@@ -36,6 +36,8 @@ export type WaffoPancakePaymentResponse = ApiResponse<
     }
   | string
 >
+export type AlipayPaymentResponse = ApiResponse<{ pay_form: string }>
+export type WxpayPaymentResponse = ApiResponse<{ code_url: string }>
 
 /**
  * Creem product configuration
@@ -127,6 +129,14 @@ export interface TopupInfo {
   enable_waffo_pancake_topup?: boolean
   /** Minimum topup amount for Waffo Pancake */
   waffo_pancake_min_topup?: number
+  /** Whether Alipay topup is enabled */
+  enable_alipay_topup?: boolean
+  /** Minimum topup amount for Alipay */
+  alipay_min_topup?: number
+  /** Whether WeChat Pay topup is enabled */
+  enable_wxpay_topup?: boolean
+  /** Minimum topup amount for WeChat Pay */
+  wxpay_min_topup?: number
 }
 
 /**

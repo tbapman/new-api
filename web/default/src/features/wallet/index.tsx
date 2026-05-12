@@ -9,10 +9,11 @@ import { BillingHistoryDialog } from './components/dialogs/billing-history-dialo
 import { CreemConfirmDialog } from './components/dialogs/creem-confirm-dialog'
 import { PaymentConfirmDialog } from './components/dialogs/payment-confirm-dialog'
 import { TransferDialog } from './components/dialogs/transfer-dialog'
+import { WxpayQrDialog } from './components/dialogs/wxpay-qr-dialog'
 import { RechargeFormCard } from './components/recharge-form-card'
 import { SubscriptionPlansCard } from './components/subscription-plans-card'
 import { WalletStatsCard } from './components/wallet-stats-card'
-import { DEFAULT_DISCOUNT_RATE } from './constants'
+import { DEFAULT_DISCOUNT_RATE, PAYMENT_TYPES } from './constants'
 import {
   useTopupInfo,
   usePayment,
@@ -21,6 +22,8 @@ import {
   useCreemPayment,
   useWaffoPayment,
   useWaffoPancakePayment,
+  useAlipayPayment,
+  useWxpayPayment,
 } from './hooks'
 import {
   getDefaultPaymentType,
@@ -84,6 +87,23 @@ export function Wallet(props: WalletProps) {
   const { processWaffoPayment } = useWaffoPayment()
   const { processing: pancakeProcessing, processWaffoPancakePayment } =
     useWaffoPancakePayment()
+  const {
+    amount: alipayPaymentAmount,
+    calculating: alipayCalculating,
+    processing: alipayProcessing,
+    calculateAlipayPaymentAmount,
+    processAlipayPayment,
+  } = useAlipayPayment()
+  const {
+    amount: wxpayPaymentAmount,
+    calculating: wxpayCalculating,
+    processing: wxpayProcessing,
+    qrCodeUrl,
+    qrDialogOpen,
+    setQrDialogOpen,
+    calculateWxpayPaymentAmount,
+    processWxpayPayment,
+  } = useWxpayPayment()
 
   // Fetch and refresh user data
   const fetchUser = useCallback(async () => {
@@ -118,11 +138,30 @@ export function Wallet(props: WalletProps) {
       const minTopup = getMinTopupAmount(topupInfo)
       setTopupAmount(minTopup)
 
-      // Calculate initial payment amount with default payment type
       const defaultPaymentType = getDefaultPaymentType(topupInfo)
-      calculatePaymentAmount(minTopup, defaultPaymentType)
+      if (defaultPaymentType === PAYMENT_TYPES.ALIPAY) {
+        calculateAlipayPaymentAmount(minTopup)
+      } else if (defaultPaymentType === PAYMENT_TYPES.WECHAT) {
+        calculateWxpayPaymentAmount(minTopup)
+      } else {
+        calculatePaymentAmount(minTopup, defaultPaymentType)
+      }
     }
-  }, [topupInfo, topupAmount, calculatePaymentAmount])
+  }, [topupInfo, topupAmount, calculatePaymentAmount, calculateAlipayPaymentAmount, calculateWxpayPaymentAmount])
+
+  // Dispatch amount calculation to the right provider
+  const dispatchCalculateAmount = useCallback(
+    async (topupAmt: number, paymentType: string) => {
+      if (paymentType === PAYMENT_TYPES.ALIPAY) {
+        return calculateAlipayPaymentAmount(topupAmt)
+      }
+      if (paymentType === PAYMENT_TYPES.WECHAT) {
+        return calculateWxpayPaymentAmount(topupAmt)
+      }
+      return calculatePaymentAmount(topupAmt, paymentType)
+    },
+    [calculateAlipayPaymentAmount, calculateWxpayPaymentAmount, calculatePaymentAmount]
+  )
 
   // Get current payment type (selected or default)
   const getCurrentPaymentType = useCallback(() => {
@@ -133,15 +172,37 @@ export function Wallet(props: WalletProps) {
   const handleSelectPreset = (preset: PresetAmount) => {
     setTopupAmount(preset.value)
     setSelectedPreset(preset.value)
-    calculatePaymentAmount(preset.value, getCurrentPaymentType())
+    dispatchCalculateAmount(preset.value, getCurrentPaymentType())
   }
 
   // Handle topup amount change
   const handleTopupAmountChange = (amount: number) => {
     setTopupAmount(amount)
     setSelectedPreset(null)
-    calculatePaymentAmount(amount, getCurrentPaymentType())
+    dispatchCalculateAmount(amount, getCurrentPaymentType())
   }
+
+  // Resolve the payment amount for the currently selected payment type
+  const resolvedPaymentAmount = useMemo(() => {
+    const type = selectedPaymentMethod?.type
+    if (type === PAYMENT_TYPES.ALIPAY) return alipayPaymentAmount
+    if (type === PAYMENT_TYPES.WECHAT) return wxpayPaymentAmount
+    return paymentAmount
+  }, [selectedPaymentMethod, alipayPaymentAmount, wxpayPaymentAmount, paymentAmount])
+
+  const resolvedCalculating = useMemo(() => {
+    const type = selectedPaymentMethod?.type
+    if (type === PAYMENT_TYPES.ALIPAY) return alipayCalculating
+    if (type === PAYMENT_TYPES.WECHAT) return wxpayCalculating
+    return calculating
+  }, [selectedPaymentMethod, alipayCalculating, wxpayCalculating, calculating])
+
+  const resolvedProcessing = useMemo(() => {
+    const type = selectedPaymentMethod?.type
+    if (type === PAYMENT_TYPES.ALIPAY) return alipayProcessing
+    if (type === PAYMENT_TYPES.WECHAT) return wxpayProcessing
+    return processing || pancakeProcessing
+  }, [selectedPaymentMethod, alipayProcessing, wxpayProcessing, processing, pancakeProcessing])
 
   // Handle payment method selection
   const handlePaymentMethodSelect = async (method: PaymentMethod) => {
@@ -156,7 +217,7 @@ export function Wallet(props: WalletProps) {
       }
 
       // Calculate payment amount and show confirmation dialog
-      await calculatePaymentAmount(topupAmount, method.type)
+      await dispatchCalculateAmount(topupAmount, method.type)
       setConfirmDialogOpen(true)
     } finally {
       setPaymentLoading(null)
@@ -167,10 +228,18 @@ export function Wallet(props: WalletProps) {
   const handlePaymentConfirm = async () => {
     if (!selectedPaymentMethod) return
 
-    const isPancake = isWaffoPancakePayment(selectedPaymentMethod.type)
-    const success = isPancake
-      ? await processWaffoPancakePayment(topupAmount)
-      : await processPayment(topupAmount, selectedPaymentMethod.type)
+    const type = selectedPaymentMethod.type
+    let success = false
+
+    if (type === PAYMENT_TYPES.ALIPAY) {
+      success = await processAlipayPayment(topupAmount)
+    } else if (type === PAYMENT_TYPES.WECHAT) {
+      success = await processWxpayPayment(topupAmount)
+    } else if (isWaffoPancakePayment(type)) {
+      success = await processWaffoPancakePayment(topupAmount)
+    } else {
+      success = await processPayment(topupAmount, type)
+    }
 
     if (success) {
       setConfirmDialogOpen(false)
@@ -312,12 +381,19 @@ export function Wallet(props: WalletProps) {
         onOpenChange={setConfirmDialogOpen}
         onConfirm={handlePaymentConfirm}
         topupAmount={topupAmount}
-        paymentAmount={paymentAmount}
+        paymentAmount={resolvedPaymentAmount}
         paymentMethod={selectedPaymentMethod}
-        calculating={calculating}
-        processing={processing || pancakeProcessing}
+        calculating={resolvedCalculating}
+        processing={resolvedProcessing}
         discountRate={getDiscountRate()}
         usdExchangeRate={effectiveUsdExchangeRate}
+      />
+
+      <WxpayQrDialog
+        open={qrDialogOpen}
+        onOpenChange={setQrDialogOpen}
+        codeUrl={qrCodeUrl}
+        paymentAmount={wxpayPaymentAmount}
       />
 
       <TransferDialog

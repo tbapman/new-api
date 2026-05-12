@@ -20,6 +20,8 @@ import type {
   WaffoPaymentResponse,
   WaffoPancakePaymentRequest,
   WaffoPancakePaymentResponse,
+  AlipayPaymentResponse,
+  WxpayPaymentResponse,
 } from './types'
 
 // ============================================================================
@@ -145,6 +147,54 @@ export async function requestWaffoPancakePayment(
   request: WaffoPancakePaymentRequest
 ): Promise<WaffoPancakePaymentResponse> {
   const res = await api.post('/api/user/waffo-pancake/pay', request, {
+    skipBusinessError: true,
+  } as Record<string, unknown>)
+  return res.data
+}
+
+/**
+ * Calculate payment amount for Alipay payment
+ */
+export async function calculateAlipayAmount(
+  request: AmountRequest
+): Promise<AmountResponse> {
+  const res = await api.post('/api/user/alipay/amount', request, {
+    skipBusinessError: true,
+  } as Record<string, unknown>)
+  return res.data
+}
+
+/**
+ * Request Alipay payment (returns HTML form)
+ */
+export async function requestAlipayPayment(
+  request: PaymentRequest
+): Promise<AlipayPaymentResponse> {
+  const res = await api.post('/api/user/alipay/pay', request, {
+    skipBusinessError: true,
+  } as Record<string, unknown>)
+  return res.data
+}
+
+/**
+ * Calculate payment amount for WeChat Pay payment
+ */
+export async function calculateWxpayAmount(
+  request: AmountRequest
+): Promise<AmountResponse> {
+  const res = await api.post('/api/user/wxpay/amount', request, {
+    skipBusinessError: true,
+  } as Record<string, unknown>)
+  return res.data
+}
+
+/**
+ * Request WeChat Pay payment (returns QR code URL)
+ */
+export async function requestWxpayPayment(
+  request: PaymentRequest
+): Promise<WxpayPaymentResponse> {
+  const res = await api.post('/api/user/wxpay/pay', request, {
     skipBusinessError: true,
   } as Record<string, unknown>)
   return res.data
