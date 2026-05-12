@@ -234,6 +234,23 @@ export type BillingSettings = {
   WaffoPancakeCurrency: string
   WaffoPancakeUnitPrice: number
   WaffoPancakeMinTopUp: number
+  AlipayEnabled: boolean
+  AlipayAppId: string
+  AlipayPrivateKey: string
+  AlipayPublicKey: string
+  AlipayNotifyUrl: string
+  AlipayReturnUrl: string
+  AlipayMinTopUp: number
+  AlipaySandbox: boolean
+  WxpayEnabled: boolean
+  WxpayAppId: string
+  WxpayMchId: string
+  WxpayApiV3Key: string
+  WxpayCertSerialNo: string
+  WxpayPrivateKey: string
+  WxpayNotifyUrl: string
+  WxpayTimeoutMinutes: number
+  WxpayMinTopUp: number
   'checkin_setting.enabled': boolean
   'checkin_setting.min_quota': number
   'checkin_setting.max_quota': number

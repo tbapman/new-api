@@ -103,6 +103,23 @@ const paymentSchema = z.object({
       })
     }
   }),
+  AlipayEnabled: z.boolean(),
+  AlipayAppId: z.string(),
+  AlipayPrivateKey: z.string(),
+  AlipayPublicKey: z.string(),
+  AlipayNotifyUrl: z.string(),
+  AlipayReturnUrl: z.string(),
+  AlipayMinTopUp: z.coerce.number().min(1),
+  AlipaySandbox: z.boolean(),
+  WxpayEnabled: z.boolean(),
+  WxpayAppId: z.string(),
+  WxpayMchId: z.string(),
+  WxpayApiV3Key: z.string(),
+  WxpayCertSerialNo: z.string(),
+  WxpayPrivateKey: z.string(),
+  WxpayNotifyUrl: z.string(),
+  WxpayTimeoutMinutes: z.coerce.number().min(1),
+  WxpayMinTopUp: z.coerce.number().min(1),
 })
 
 type PaymentFormValues = z.infer<typeof paymentSchema>
@@ -340,6 +357,96 @@ export function PaymentSettingsSection({
     for (const update of updates) {
       await updateOption.mutateAsync(update)
     }
+  }
+
+  const saveAlipaySettings = async () => {
+    const values = form.getValues()
+    const sanitized = {
+      AlipayEnabled: values.AlipayEnabled,
+      AlipayAppId: values.AlipayAppId.trim(),
+      AlipayPrivateKey: values.AlipayPrivateKey.trim(),
+      AlipayPublicKey: values.AlipayPublicKey.trim(),
+      AlipayNotifyUrl: removeTrailingSlash(values.AlipayNotifyUrl),
+      AlipayReturnUrl: removeTrailingSlash(values.AlipayReturnUrl),
+      AlipayMinTopUp: values.AlipayMinTopUp as number,
+      AlipaySandbox: values.AlipaySandbox,
+    }
+    const initial = {
+      AlipayEnabled: initialRef.current.AlipayEnabled,
+      AlipayAppId: initialRef.current.AlipayAppId.trim(),
+      AlipayPrivateKey: initialRef.current.AlipayPrivateKey.trim(),
+      AlipayPublicKey: initialRef.current.AlipayPublicKey.trim(),
+      AlipayNotifyUrl: removeTrailingSlash(initialRef.current.AlipayNotifyUrl),
+      AlipayReturnUrl: removeTrailingSlash(initialRef.current.AlipayReturnUrl),
+      AlipayMinTopUp: initialRef.current.AlipayMinTopUp,
+      AlipaySandbox: initialRef.current.AlipaySandbox,
+    }
+    const updates: Array<{ key: string; value: string | number | boolean }> = []
+    if (sanitized.AlipayEnabled !== initial.AlipayEnabled)
+      updates.push({ key: 'AlipayEnabled', value: sanitized.AlipayEnabled })
+    if (sanitized.AlipayAppId !== initial.AlipayAppId)
+      updates.push({ key: 'AlipayAppId', value: sanitized.AlipayAppId })
+    if (sanitized.AlipayPrivateKey && sanitized.AlipayPrivateKey !== initial.AlipayPrivateKey)
+      updates.push({ key: 'AlipayPrivateKey', value: sanitized.AlipayPrivateKey })
+    if (sanitized.AlipayPublicKey && sanitized.AlipayPublicKey !== initial.AlipayPublicKey)
+      updates.push({ key: 'AlipayPublicKey', value: sanitized.AlipayPublicKey })
+    if (sanitized.AlipayNotifyUrl !== initial.AlipayNotifyUrl)
+      updates.push({ key: 'AlipayNotifyUrl', value: sanitized.AlipayNotifyUrl })
+    if (sanitized.AlipayReturnUrl !== initial.AlipayReturnUrl)
+      updates.push({ key: 'AlipayReturnUrl', value: sanitized.AlipayReturnUrl })
+    if (sanitized.AlipayMinTopUp !== initial.AlipayMinTopUp)
+      updates.push({ key: 'AlipayMinTopUp', value: sanitized.AlipayMinTopUp })
+    if (sanitized.AlipaySandbox !== initial.AlipaySandbox)
+      updates.push({ key: 'AlipaySandbox', value: sanitized.AlipaySandbox })
+    if (updates.length === 0) return
+    for (const update of updates) await updateOption.mutateAsync(update)
+  }
+
+  const saveWxpaySettings = async () => {
+    const values = form.getValues()
+    const sanitized = {
+      WxpayEnabled: values.WxpayEnabled,
+      WxpayAppId: values.WxpayAppId.trim(),
+      WxpayMchId: values.WxpayMchId.trim(),
+      WxpayApiV3Key: values.WxpayApiV3Key.trim(),
+      WxpayCertSerialNo: values.WxpayCertSerialNo.trim(),
+      WxpayPrivateKey: values.WxpayPrivateKey.trim(),
+      WxpayNotifyUrl: removeTrailingSlash(values.WxpayNotifyUrl),
+      WxpayTimeoutMinutes: values.WxpayTimeoutMinutes as number,
+      WxpayMinTopUp: values.WxpayMinTopUp as number,
+    }
+    const initial = {
+      WxpayEnabled: initialRef.current.WxpayEnabled,
+      WxpayAppId: initialRef.current.WxpayAppId.trim(),
+      WxpayMchId: initialRef.current.WxpayMchId.trim(),
+      WxpayApiV3Key: initialRef.current.WxpayApiV3Key.trim(),
+      WxpayCertSerialNo: initialRef.current.WxpayCertSerialNo.trim(),
+      WxpayPrivateKey: initialRef.current.WxpayPrivateKey.trim(),
+      WxpayNotifyUrl: removeTrailingSlash(initialRef.current.WxpayNotifyUrl),
+      WxpayTimeoutMinutes: initialRef.current.WxpayTimeoutMinutes,
+      WxpayMinTopUp: initialRef.current.WxpayMinTopUp,
+    }
+    const updates: Array<{ key: string; value: string | number | boolean }> = []
+    if (sanitized.WxpayEnabled !== initial.WxpayEnabled)
+      updates.push({ key: 'WxpayEnabled', value: sanitized.WxpayEnabled })
+    if (sanitized.WxpayAppId !== initial.WxpayAppId)
+      updates.push({ key: 'WxpayAppId', value: sanitized.WxpayAppId })
+    if (sanitized.WxpayMchId !== initial.WxpayMchId)
+      updates.push({ key: 'WxpayMchId', value: sanitized.WxpayMchId })
+    if (sanitized.WxpayApiV3Key && sanitized.WxpayApiV3Key !== initial.WxpayApiV3Key)
+      updates.push({ key: 'WxpayApiV3Key', value: sanitized.WxpayApiV3Key })
+    if (sanitized.WxpayCertSerialNo !== initial.WxpayCertSerialNo)
+      updates.push({ key: 'WxpayCertSerialNo', value: sanitized.WxpayCertSerialNo })
+    if (sanitized.WxpayPrivateKey && sanitized.WxpayPrivateKey !== initial.WxpayPrivateKey)
+      updates.push({ key: 'WxpayPrivateKey', value: sanitized.WxpayPrivateKey })
+    if (sanitized.WxpayNotifyUrl !== initial.WxpayNotifyUrl)
+      updates.push({ key: 'WxpayNotifyUrl', value: sanitized.WxpayNotifyUrl })
+    if (sanitized.WxpayTimeoutMinutes !== initial.WxpayTimeoutMinutes)
+      updates.push({ key: 'WxpayTimeoutMinutes', value: sanitized.WxpayTimeoutMinutes })
+    if (sanitized.WxpayMinTopUp !== initial.WxpayMinTopUp)
+      updates.push({ key: 'WxpayMinTopUp', value: sanitized.WxpayMinTopUp })
+    if (updates.length === 0) return
+    for (const update of updates) await updateOption.mutateAsync(update)
   }
 
   const saveCreemSettings = async () => {
@@ -1275,6 +1382,464 @@ export function PaymentSettingsSection({
               {updateOption.isPending
                 ? t('Saving...')
                 : t('Save Creem settings')}
+            </Button>
+          </div>
+
+          <Separator />
+
+          <div className='space-y-4'>
+            <div>
+              <h3 className='text-lg font-medium'>{t('Alipay Gateway')}</h3>
+              <p className='text-muted-foreground text-sm'>
+                {t('Configuration for Alipay payment integration')}
+              </p>
+            </div>
+
+            <div className='rounded-md bg-blue-50 p-4 text-sm text-blue-900 dark:bg-blue-950 dark:text-blue-100'>
+              <p className='mb-2 font-medium'>{t('Webhook Configuration:')}</p>
+              <ul className='list-inside list-disc space-y-1'>
+                <li>
+                  {t('Async notify URL:')}{' '}
+                  <code className='rounded bg-blue-100 px-1 py-0.5 text-xs dark:bg-blue-900'>
+                    {'<ServerAddress>/api/alipay/notify'}
+                  </code>
+                </li>
+                <li>
+                  {t('Sync return URL (optional):')}{' '}
+                  <code className='rounded bg-blue-100 px-1 py-0.5 text-xs dark:bg-blue-900'>
+                    {'<ServerAddress>/console/log'}
+                  </code>
+                </li>
+              </ul>
+            </div>
+
+            <FormField
+              control={form.control}
+              name='AlipayEnabled'
+              render={({ field }) => (
+                <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
+                  <div className='space-y-0.5'>
+                    <FormLabel className='text-base'>
+                      {t('Enable Alipay')}
+                    </FormLabel>
+                    <FormDescription>
+                      {t('Allow users to recharge via Alipay')}
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <div className='grid gap-6 md:grid-cols-2'>
+              <FormField
+                control={form.control}
+                name='AlipayAppId'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('App ID')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='2021xxxxxxxxxxxxxxx'
+                        {...field}
+                        onChange={(event) => field.onChange(event.target.value)}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t('Alipay open platform App ID')}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='AlipayMinTopUp'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Minimum top-up')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        min={1}
+                        value={(field.value ?? 1) as number}
+                        onChange={(event) =>
+                          field.onChange(event.target.valueAsNumber)
+                        }
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t('Minimum recharge amount for Alipay')}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name='AlipayNotifyUrl'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('Async notify URL')}</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder='https://yourdomain.com/api/alipay/notify'
+                      {...field}
+                      onChange={(event) => field.onChange(event.target.value)}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {t('URL Alipay server calls after payment')}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='AlipayReturnUrl'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('Sync return URL (optional)')}</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder='https://yourdomain.com/console/log'
+                      {...field}
+                      onChange={(event) => field.onChange(event.target.value)}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {t('Page user is redirected to after payment. Leave blank to use default.')}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className='grid gap-6 md:grid-cols-2'>
+              <FormField
+                control={form.control}
+                name='AlipayPrivateKey'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Merchant private key (RSA2)')}</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        rows={4}
+                        placeholder={t('PEM or base64 encoded PKCS1 private key (leave blank unless updating)')}
+                        autoComplete='new-password'
+                        {...field}
+                        onChange={(event) => field.onChange(event.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='AlipayPublicKey'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Alipay platform public key')}</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        rows={4}
+                        placeholder={t('PEM or base64 encoded public key for signature verification (leave blank unless updating)')}
+                        {...field}
+                        onChange={(event) => field.onChange(event.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name='AlipaySandbox'
+              render={({ field }) => (
+                <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
+                  <div className='space-y-0.5'>
+                    <FormLabel className='text-base'>
+                      {t('Sandbox mode')}
+                    </FormLabel>
+                    <FormDescription>
+                      {t('Use Alipay sandbox environment for testing')}
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <Button
+              type='button'
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                saveAlipaySettings()
+              }}
+              disabled={updateOption.isPending}
+            >
+              {updateOption.isPending
+                ? t('Saving...')
+                : t('Save Alipay settings')}
+            </Button>
+          </div>
+
+          <Separator />
+
+          <div className='space-y-4'>
+            <div>
+              <h3 className='text-lg font-medium'>{t('WeChat Pay Gateway')}</h3>
+              <p className='text-muted-foreground text-sm'>
+                {t('Configuration for WeChat Pay (V3 Native) integration')}
+              </p>
+            </div>
+
+            <div className='rounded-md bg-blue-50 p-4 text-sm text-blue-900 dark:bg-blue-950 dark:text-blue-100'>
+              <p className='mb-2 font-medium'>{t('Webhook Configuration:')}</p>
+              <ul className='list-inside list-disc space-y-1'>
+                <li>
+                  {t('Notify URL:')}{' '}
+                  <code className='rounded bg-blue-100 px-1 py-0.5 text-xs dark:bg-blue-900'>
+                    {'<ServerAddress>/api/wxpay/notify'}
+                  </code>
+                </li>
+                <li>{t('Configure in WeChat Pay merchant dashboard')}</li>
+              </ul>
+            </div>
+
+            <FormField
+              control={form.control}
+              name='WxpayEnabled'
+              render={({ field }) => (
+                <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
+                  <div className='space-y-0.5'>
+                    <FormLabel className='text-base'>
+                      {t('Enable WeChat Pay')}
+                    </FormLabel>
+                    <FormDescription>
+                      {t('Allow users to recharge via WeChat Pay')}
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <div className='grid gap-6 md:grid-cols-3'>
+              <FormField
+                control={form.control}
+                name='WxpayAppId'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('App ID')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='wx...'
+                        {...field}
+                        onChange={(event) => field.onChange(event.target.value)}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t('WeChat App ID')}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='WxpayMchId'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Merchant ID')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='1xxxxxxxxx'
+                        {...field}
+                        onChange={(event) => field.onChange(event.target.value)}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t('WeChat Pay merchant number')}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='WxpayCertSerialNo'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Certificate serial number')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='...'
+                        {...field}
+                        onChange={(event) => field.onChange(event.target.value)}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t('Merchant API certificate serial number')}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name='WxpayNotifyUrl'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('Notify URL')}</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder='https://yourdomain.com/api/wxpay/notify'
+                      {...field}
+                      onChange={(event) => field.onChange(event.target.value)}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {t('URL WeChat Pay server calls after payment')}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className='grid gap-6 md:grid-cols-2'>
+              <FormField
+                control={form.control}
+                name='WxpayApiV3Key'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('APIv3 key')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='password'
+                        placeholder={t('32-byte APIv3 key (leave blank unless updating)')}
+                        autoComplete='new-password'
+                        {...field}
+                        onChange={(event) => field.onChange(event.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='WxpayPrivateKey'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Merchant private key (PKCS8)')}</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        rows={4}
+                        placeholder={t('PEM or base64 encoded PKCS8 private key (leave blank unless updating)')}
+                        autoComplete='new-password'
+                        {...field}
+                        onChange={(event) => field.onChange(event.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className='grid gap-6 md:grid-cols-2'>
+              <FormField
+                control={form.control}
+                name='WxpayTimeoutMinutes'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Payment timeout (minutes)')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        min={1}
+                        value={(field.value ?? 30) as number}
+                        onChange={(event) =>
+                          field.onChange(event.target.valueAsNumber)
+                        }
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t('QR code expiry time in minutes')}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='WxpayMinTopUp'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Minimum top-up')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        min={1}
+                        value={(field.value ?? 1) as number}
+                        onChange={(event) =>
+                          field.onChange(event.target.valueAsNumber)
+                        }
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t('Minimum recharge amount for WeChat Pay')}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <Button
+              type='button'
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                saveWxpaySettings()
+              }}
+              disabled={updateOption.isPending}
+            >
+              {updateOption.isPending
+                ? t('Saving...')
+                : t('Save WeChat Pay settings')}
             </Button>
           </div>
 
