@@ -90,12 +90,54 @@ func GetTopUpInfo(c *gin.Context) {
 		}
 	}
 
+	// 支付宝
+	enableAlipay := isAlipayTopUpEnabled()
+	if enableAlipay {
+		hasAlipay := false
+		for _, method := range payMethods {
+			if method["type"] == model.PaymentMethodAlipay {
+				hasAlipay = true
+				break
+			}
+		}
+		if !hasAlipay {
+			payMethods = append(payMethods, map[string]string{
+				"name":      "支付宝",
+				"type":      model.PaymentMethodAlipay,
+				"color":     "rgba(var(--semi-blue-6), 1)",
+				"min_topup": strconv.Itoa(setting.AlipayMinTopUp),
+			})
+		}
+	}
+
+	// 微信支付
+	enableWxpay := isWxpayTopUpEnabled()
+	if enableWxpay {
+		hasWxpay := false
+		for _, method := range payMethods {
+			if method["type"] == model.PaymentMethodWxpay {
+				hasWxpay = true
+				break
+			}
+		}
+		if !hasWxpay {
+			payMethods = append(payMethods, map[string]string{
+				"name":      "微信支付",
+				"type":      model.PaymentMethodWxpay,
+				"color":     "rgba(var(--semi-green-6), 1)",
+				"min_topup": strconv.Itoa(setting.WxpayMinTopUp),
+			})
+		}
+	}
+
 	data := gin.H{
 		"enable_online_topup":        isEpayTopUpEnabled(),
 		"enable_stripe_topup":        isStripeTopUpEnabled(),
 		"enable_creem_topup":         isCreemTopUpEnabled(),
 		"enable_waffo_topup":         enableWaffo,
 		"enable_waffo_pancake_topup": enableWaffoPancake,
+		"enable_alipay_topup":        enableAlipay,
+		"enable_wxpay_topup":         enableWxpay,
 		"waffo_pay_methods": func() interface{} {
 			if enableWaffo {
 				return setting.GetWaffoPayMethods()

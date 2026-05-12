@@ -98,3 +98,28 @@ func isEpayWebhookConfigured() bool {
 func isEpayWebhookEnabled() bool {
 	return isEpayTopUpEnabled()
 }
+
+func isAlipayTopUpEnabled() bool {
+	return setting.AlipayEnabled &&
+		strings.TrimSpace(setting.AlipayAppId) != "" &&
+		strings.TrimSpace(setting.AlipayPrivateKey) != "" &&
+		strings.TrimSpace(setting.AlipayPublicKey) != "" &&
+		strings.TrimSpace(setting.AlipayNotifyUrl) != ""
+}
+
+func isAlipayWebhookEnabled() bool {
+	return isAlipayTopUpEnabled()
+}
+
+func isWxpayTopUpEnabled() bool {
+	return setting.WxpayEnabled &&
+		strings.TrimSpace(setting.WxpayMchId) != "" &&
+		strings.TrimSpace(setting.WxpayApiV3Key) != "" &&
+		strings.TrimSpace(setting.WxpayCertSerialNo) != "" &&
+		strings.TrimSpace(setting.WxpayPrivateKey) != "" &&
+		strings.TrimSpace(setting.WxpayNotifyUrl) != ""
+}
+
+func isWxpayWebhookEnabled() bool {
+	return isWxpayTopUpEnabled()
+}
