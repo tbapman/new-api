@@ -118,7 +118,12 @@ func RequestAlipayPay(c *gin.Context) {
 
 	returnUrl := setting.AlipayReturnUrl
 	if returnUrl == "" {
-		returnUrl = system_setting.ServerAddress + "/console/log"
+		// 根据当前主题选择默认回跳路径：default 主题走 /wallet，classic 主题走 /console/log
+		if common.GetTheme() == "default" {
+			returnUrl = system_setting.ServerAddress + "/wallet?show_history=true"
+		} else {
+			returnUrl = system_setting.ServerAddress + "/console/log"
+		}
 	}
 	client, err := newAlipayClient(returnUrl, setting.AlipayNotifyUrl)
 	if err != nil {
