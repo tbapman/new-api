@@ -10,7 +10,9 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"html"
 	"net/http"
+	"net/url"
 	"sort"
 	"strconv"
 	"strings"
@@ -28,6 +30,27 @@ import (
 	"github.com/go-pay/gopay/alipay"
 	"github.com/shopspring/decimal"
 )
+
+// buildAlipayAutoPostForm 将支付宝 GET URL 转换为 HTML 自动 POST 表单。
+// 支付宝生产环境 alipay.trade.page.pay 要求 POST，直接 GET 会返回 invalid-method。
+func buildAlipayAutoPostForm(payUrl string) (string, error) {
+	u, err := url.Parse(payUrl)
+	if err != nil {
+		return "", err
+	}
+	actionUrl := u.Scheme + "://" + u.Host + u.Path
+	var inputs strings.Builder
+	for key, values := range u.Query() {
+		for _, v := range values {
+			inputs.WriteString(fmt.Sprintf(`<input type="hidden" name="%s" value="%s"/>`,
+				html.EscapeString(key), html.EscapeString(v)))
+		}
+	}
+	return fmt.Sprintf(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Redirecting to Alipay...</title></head><body>
+<form id="alipay_submit_form" method="POST" action="%s">%s</form>
+<script>document.getElementById("alipay_submit_form").submit();</script>
+</body></html>`, html.EscapeString(actionUrl), inputs.String()), nil
+}
 
 type AlipayRequest struct {
 	Amount        int64  `json:"amount"`
@@ -100,9 +123,16 @@ func RequestAlipayPay(c *gin.Context) {
 	bm.Set("total_amount", strconv.FormatFloat(payMoney, 'f', 2, 64))
 	bm.Set("product_code", "FAST_INSTANT_TRADE_PAY")
 
-	payForm, err := client.TradePagePay(c.Request.Context(), bm)
+	payUrl, err := client.TradePagePay(c.Request.Context(), bm)
 	if err != nil {
 		logger.LogError(c.Request.Context(), fmt.Sprintf("支付宝 拉起支付失败 user_id=%d trade_no=%s amount=%d error=%q", id, tradeNo, req.Amount, err.Error()))
+		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "拉起支付失败"})
+		return
+	}
+
+	payForm, err := buildAlipayAutoPostForm(payUrl)
+	if err != nil {
+		logger.LogError(c.Request.Context(), fmt.Sprintf("支付宝 构造支付表单失败 user_id=%d trade_no=%s error=%q", id, tradeNo, err.Error()))
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "拉起支付失败"})
 		return
 	}
