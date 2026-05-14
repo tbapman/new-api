@@ -32,22 +32,32 @@ import (
 )
 
 // buildAlipayAutoPostForm 将支付宝 GET URL 转换为 HTML 自动 POST 表单。
-// 支付宝生产环境 alipay.trade.page.pay 要求 POST，直接 GET 会返回 invalid-method。
+// 支付宝生产环境 alipay.trade.page.pay 要求 POST，直接 GET 会返回 invalid-method；
+// 且 charset 参数必须放在 URL 查询字符串中，否则会返回 invalid-signature。
 func buildAlipayAutoPostForm(payUrl string) (string, error) {
 	u, err := url.Parse(payUrl)
 	if err != nil {
 		return "", err
 	}
-	actionUrl := u.Scheme + "://" + u.Host + u.Path
+	query := u.Query()
+	charset := query.Get("charset")
+	if charset == "" {
+		charset = "utf-8"
+	}
+	// charset 必须在 URL 中，从 body 中移除避免重复
+	query.Del("charset")
+
+	actionUrl := u.Scheme + "://" + u.Host + u.Path + "?charset=" + url.QueryEscape(charset)
+
 	var inputs strings.Builder
-	for key, values := range u.Query() {
+	for key, values := range query {
 		for _, v := range values {
 			inputs.WriteString(fmt.Sprintf(`<input type="hidden" name="%s" value="%s"/>`,
 				html.EscapeString(key), html.EscapeString(v)))
 		}
 	}
 	return fmt.Sprintf(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Redirecting to Alipay...</title></head><body>
-<form id="alipay_submit_form" method="POST" action="%s">%s</form>
+<form id="alipay_submit_form" method="POST" action="%s" accept-charset="UTF-8">%s</form>
 <script>document.getElementById("alipay_submit_form").submit();</script>
 </body></html>`, html.EscapeString(actionUrl), inputs.String()), nil
 }
