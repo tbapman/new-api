@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { PublicLayout } from '@/components/layout'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { CopyButton } from '@/components/copy-button'
 
 function Section({
   title,
@@ -21,10 +22,17 @@ function Section({
   )
 }
 
-function CodeBlock({ children }: { children: ReactNode }) {
+function CodeBlock({ children }: { children: string }) {
   return (
-    <pre className='overflow-x-auto rounded-xl bg-slate-950 px-4 py-3 text-sm leading-6 text-slate-50'>
-      <code>{children}</code>
+    <pre className='group relative overflow-x-auto rounded-xl bg-slate-950 px-4 py-3 pr-12 text-sm leading-6 text-slate-50'>
+      <CopyButton
+        value={children}
+        className='invisible absolute top-2 right-2 opacity-0 transition-opacity duration-150 group-hover:visible group-hover:opacity-100 text-slate-200 hover:bg-slate-800 hover:text-white'
+        tooltip='Copy code'
+        successTooltip='Copied!'
+        aria-label='Copy code'
+      />
+      <code className='whitespace-pre-wrap'>{children}</code>
     </pre>
   )
 }
@@ -82,8 +90,9 @@ export function Docs() {
                       <CodeBlock>{`curl -fsSL https://claude.ai/install.sh | bash`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>2. 设置环境变量</h3>
-                      <CodeBlock>{`curl -fsSL https://raw.githubusercontent.com/QuantumNous/new-api-docs/refs/heads/main/helper/claude-cli-setup.sh | bash`}</CodeBlock>
+                      <h3 className='mb-2 text-sm font-semibold'>2. 环境变量</h3>
+                      <CodeBlock>{`export ANTHROPIC_BASE_URL='https://www.modelbridge.cloud'
+export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
                     </div>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>3. 开始使用 Claude Code</h3>
@@ -95,9 +104,6 @@ export function Docs() {
                         <CodeBlock>{`/model`}</CodeBlock>
                       </div>
                     </div>
-                    <p className='text-sm leading-6 text-muted-foreground'>
-                      设置 <code className='rounded bg-muted px-1 py-0.5'>ANTHROPIC_BASE_URL</code> 后，请求走 New API。
-                    </p>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>4. macOS 常见问题解决</h3>
                       <StepList
@@ -143,8 +149,9 @@ npm --version`}</CodeBlock>
                       </div>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>4. 设置环境变量</h3>
-                      <CodeBlock>{`iex (irm 'https://raw.githubusercontent.com/QuantumNous/new-api-docs/refs/heads/main/helper/claude-cli-setup.ps1')`}</CodeBlock>
+                      <h3 className='mb-2 text-sm font-semibold'>4. 环境变量</h3>
+                      <CodeBlock>{`export ANTHROPIC_BASE_URL='https://www.modelbridge.cloud'
+export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
                     </div>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>5. 开始使用 Claude Code</h3>
@@ -174,8 +181,9 @@ npm --version`}</CodeBlock>
                       </div>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>2. 设置环境变量</h3>
-                      <CodeBlock>{`curl -fsSL https://raw.githubusercontent.com/QuantumNous/new-api-docs/refs/heads/main/helper/claude-cli-setup.sh | bash`}</CodeBlock>
+                      <h3 className='mb-2 text-sm font-semibold'>2. 环境变量</h3>
+                      <CodeBlock>{`export ANTHROPIC_BASE_URL='https://www.modelbridge.cloud'
+export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
                     </div>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>3. 开始使用 Claude Code</h3>
