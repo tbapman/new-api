@@ -65,7 +65,7 @@ export function Docs() {
           </div>
           <h1 className='text-3xl font-bold tracking-tight'>{t('Documentation')}</h1>
           <p className='max-w-3xl text-muted-foreground'>
-            Claude Code 教程，说明如何把 Anthropic 的终端编程助手接入 New API。它适合代码理解、多文件编辑和终端内的日常开发流程，也可以和 VS Code、JetBrains 等 IDE 配合使用。
+            Claude Code 教程，说明如何把 Anthropic 的终端编程助手接入 New API。下面所有步骤都以可直接复制的命令块呈现。
           </p>
         </div>
 
@@ -90,7 +90,7 @@ export function Docs() {
 
           <Section title='效果演示' id='demo'>
             <p className='text-sm leading-6 text-muted-foreground'>
-              原文包含两张演示图，分别展示 Claude Code 的介绍界面与实际工作流。当前页面先保留该章节，后续可以继续补齐截图资源。
+              这里不再使用图片展示，直接给出可复制的命令块。
             </p>
           </Section>
 
@@ -119,7 +119,7 @@ export function Docs() {
               </TabsList>
 
               <TabsContent value='mac' className='space-y-6'>
-                <Section title='MacOS 端图文指引' id='mac'>
+                <Section title='macOS 端命令指引' id='mac'>
                   <div className='space-y-4'>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>1. 安装 Claude Code CLI</h3>
@@ -131,12 +131,13 @@ export function Docs() {
                     </div>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>3. 开始使用 Claude Code</h3>
-                      <CodeBlock>{`claude
-
-cd /path/to/your/project
-claude
-
-/model`}</CodeBlock>
+                      <CodeBlock>{`claude`}</CodeBlock>
+                      <div className='mt-3'>
+                        <CodeBlock>{`cd /path/to/your/project`}</CodeBlock>
+                      </div>
+                      <div className='mt-3'>
+                        <CodeBlock>{`/model`}</CodeBlock>
+                      </div>
                     </div>
                     <p className='text-sm leading-6 text-muted-foreground'>
                       注意：设置环境变量修改 <code className='rounded bg-muted px-1 py-0.5'>ANTHROPIC_BASE_URL</code> 后，所有模型请求都会走自定义接入点，也不会使用官方账号额度。
@@ -159,7 +160,7 @@ claude
               </TabsContent>
 
               <TabsContent value='windows' className='space-y-6'>
-                <Section title='Windows 端图文指引' id='windows'>
+                <Section title='Windows 端命令指引' id='windows'>
                   <div className='space-y-4'>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>1. 安装 Node.js 环境</h3>
@@ -178,14 +179,15 @@ npm --version`}</CodeBlock>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>2. 安装 Git Bash</h3>
                       <p className='text-sm leading-6 text-muted-foreground'>
-                        Windows 环境下建议使用 Git Bash 完成 Claude Code 的安装步骤，后续的环境变量配置和日常使用仍然可以在 PowerShell 或 CMD 中进行。
+                        Windows 环境下建议使用 Git Bash 完成 Claude Code 的安装步骤，后续命令可直接复制到 PowerShell 或 CMD。
                       </p>
                     </div>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>3. 安装 Claude Code</h3>
-                      <CodeBlock>{`npm install -g @anthropic-ai/claude-code
-
-claude --version`}</CodeBlock>
+                      <CodeBlock>{`npm install -g @anthropic-ai/claude-code`}</CodeBlock>
+                      <div className='mt-3'>
+                        <CodeBlock>{`claude --version`}</CodeBlock>
+                      </div>
                     </div>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>4. 设置环境变量</h3>
@@ -193,12 +195,13 @@ claude --version`}</CodeBlock>
                     </div>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>5. 开始使用 Claude Code</h3>
-                      <CodeBlock>{`claude
-
-cd C:\\path\\to\\your\\project
-claude
-
-/model`}</CodeBlock>
+                      <CodeBlock>{`claude`}</CodeBlock>
+                      <div className='mt-3'>
+                        <CodeBlock>{`cd C:\\path\\to\\your\\project`}</CodeBlock>
+                      </div>
+                      <div className='mt-3'>
+                        <CodeBlock>{`/model`}</CodeBlock>
+                      </div>
                       <p className='mt-4 text-sm leading-6 text-muted-foreground'>
                         注意：设置环境变量后，所有模型请求都会走自定义接入点，包括官方预设模型在内，也不会消耗官方账号额度。
                       </p>
@@ -218,15 +221,17 @@ claude
               </TabsContent>
 
               <TabsContent value='linux' className='space-y-6'>
-                <Section title='Linux 端图文指引' id='linux'>
+                <Section title='Linux 端命令指引' id='linux'>
                   <div className='space-y-4'>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>1. 安装 Claude Code</h3>
-                      <CodeBlock>{`curl -fsSL https://claude.ai/install.sh | bash
-
-sudo curl -fsSL https://claude.ai/install.sh | bash
-
-claude --version`}</CodeBlock>
+                      <CodeBlock>{`curl -fsSL https://claude.ai/install.sh | bash`}</CodeBlock>
+                      <div className='mt-3'>
+                        <CodeBlock>{`sudo curl -fsSL https://claude.ai/install.sh | bash`}</CodeBlock>
+                      </div>
+                      <div className='mt-3'>
+                        <CodeBlock>{`claude --version`}</CodeBlock>
+                      </div>
                     </div>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>2. 设置环境变量</h3>
@@ -234,12 +239,13 @@ claude --version`}</CodeBlock>
                     </div>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>3. 开始使用 Claude Code</h3>
-                      <CodeBlock>{`claude
-
-cd /path/to/your/project
-claude
-
-/model`}</CodeBlock>
+                      <CodeBlock>{`claude`}</CodeBlock>
+                      <div className='mt-3'>
+                        <CodeBlock>{`cd /path/to/your/project`}</CodeBlock>
+                      </div>
+                      <div className='mt-3'>
+                        <CodeBlock>{`/model`}</CodeBlock>
+                      </div>
                       <p className='mt-4 text-sm leading-6 text-muted-foreground'>
                         注意：设置环境变量修改 <code className='rounded bg-muted px-1 py-0.5'>ANTHROPIC_BASE_URL</code> 后，所有模型请求都会走自定义接入点，也不会使用官方账号额度。
                       </p>
