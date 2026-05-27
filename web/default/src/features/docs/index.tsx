@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { PublicLayout } from '@/components/layout'
@@ -49,6 +49,7 @@ function StepList({ items }: { items: string[] }) {
 
 export function Docs() {
   const { t } = useTranslation()
+  const [activeApp, setActiveApp] = useState<'claude' | 'codex'>('claude')
 
   return (
     <PublicLayout>
@@ -56,7 +57,7 @@ export function Docs() {
         <div className='mb-8 space-y-4'>
           <div className='flex flex-wrap items-center gap-2'>
             <Badge variant='secondary'>Docs</Badge>
-            <Badge variant='outline'>Claude Code</Badge>
+            <Badge variant='outline'>{activeApp === 'claude' ? 'Claude Code' : 'Codex CLI'}</Badge>
           </div>
           <h1 className='text-3xl font-bold tracking-tight'>{t('Documentation')}</h1>
           <p className='max-w-3xl text-muted-foreground'>
@@ -65,17 +66,33 @@ export function Docs() {
         </div>
 
         <div className='mb-8 flex flex-wrap gap-2'>
-          <button className='inline-flex items-center gap-2 rounded-lg border border-primary bg-primary px-4 py-2 text-sm font-medium text-primary-foreground'>
+          <button
+            className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+              activeApp === 'claude'
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:bg-muted'
+            }`}
+            onClick={() => setActiveApp('claude')}
+            type='button'
+          >
             Claude Code
           </button>
-          <button className='inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium text-muted-foreground'>
+          <button
+            className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+              activeApp === 'codex'
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:bg-muted'
+            }`}
+            onClick={() => setActiveApp('codex')}
+            type='button'
+          >
             Codex CLI
           </button>
         </div>
 
         <div className='space-y-6'>
           <Section title='AI 模型配置方法' id='setup'>
-            <Tabs defaultValue='mac'>
+            <Tabs defaultValue='mac' key={activeApp}>
               <TabsList className='mb-6 flex flex-wrap'>
                 <TabsTrigger value='mac'>macOS</TabsTrigger>
                 <TabsTrigger value='windows'>Windows</TabsTrigger>
@@ -83,7 +100,8 @@ export function Docs() {
               </TabsList>
 
               <TabsContent value='mac' className='space-y-6'>
-                <Section title='macOS' id='mac'>
+                {activeApp === 'claude' ? (
+                  <Section title='macOS' id='mac'>
                   <div className='space-y-4'>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>1. 安装 Claude Code CLI</h3>
@@ -122,11 +140,51 @@ export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
                       </div>
                     </div>
                   </div>
-                </Section>
+                  </Section>
+                ) : (
+                  <Section title='macOS' id='codex-mac'>
+                    <div className='space-y-4'>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>1. 安装 Homebrew</h3>
+                        <CodeBlock>{`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`}</CodeBlock>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>2. 安装 Node.js</h3>
+                        <CodeBlock>{`brew update
+brew install node`}</CodeBlock>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>3. 安装 Codex CLI</h3>
+                        <CodeBlock>{`npm install -g @openai/codex`}</CodeBlock>
+                        <div className='mt-3'>
+                          <CodeBlock>{`codex --version`}</CodeBlock>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>4. 配置</h3>
+                        <CodeBlock>{`curl -fsSL https://raw.githubusercontent.com/QuantumNous/new-api-docs/refs/heads/main/helper/codex-cli-setup.sh | bash`}</CodeBlock>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>5. 开始使用</h3>
+                        <CodeBlock>{`codex`}</CodeBlock>
+                        <div className='mt-3'>
+                          <CodeBlock>{`cd /path/to/your/project`}</CodeBlock>
+                        </div>
+                        <div className='mt-3'>
+                          <CodeBlock>{`codex`}</CodeBlock>
+                        </div>
+                        <div className='mt-3'>
+                          <CodeBlock>{`/model`}</CodeBlock>
+                        </div>
+                      </div>
+                    </div>
+                  </Section>
+                )}
               </TabsContent>
 
               <TabsContent value='windows' className='space-y-6'>
-                <Section title='Windows' id='windows'>
+                {activeApp === 'claude' ? (
+                  <Section title='Windows' id='windows'>
                   <div className='space-y-4'>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>1. 安装 Node.js 环境</h3>
@@ -172,11 +230,53 @@ export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
                       </div>
                     </div>
                   </div>
-                </Section>
+                  </Section>
+                ) : (
+                  <Section title='Windows' id='codex-windows'>
+                    <div className='space-y-4'>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>1. 打开终端</h3>
+                        <CodeBlock>{`wsl`}</CodeBlock>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>2. 安装 WSL2</h3>
+                        <CodeBlock>{`wsl --install`}</CodeBlock>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>3. 安装 Node 22</h3>
+                        <CodeBlock>{`curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
+nvm install 22`}</CodeBlock>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>4. 安装 Codex CLI</h3>
+                        <CodeBlock>{`npm i -g @openai/codex`}</CodeBlock>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>5. 配置</h3>
+                        <CodeBlock>{`iex (irm 'https://raw.githubusercontent.com/QuantumNous/new-api-docs/refs/heads/main/helper/codex-cli-setup.ps1')`}</CodeBlock>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>6. 开始使用</h3>
+                        <CodeBlock>{`wsl`}</CodeBlock>
+                        <div className='mt-3'>
+                          <CodeBlock>{`codex`}</CodeBlock>
+                        </div>
+                        <div className='mt-3'>
+                          <CodeBlock>{`cd /mnt/c/path/to/your/project
+codex`}</CodeBlock>
+                        </div>
+                        <div className='mt-3'>
+                          <CodeBlock>{`/model`}</CodeBlock>
+                        </div>
+                      </div>
+                    </div>
+                  </Section>
+                )}
               </TabsContent>
 
               <TabsContent value='linux' className='space-y-6'>
-                <Section title='Linux' id='linux'>
+                {activeApp === 'claude' ? (
+                  <Section title='Linux' id='linux'>
                   <div className='space-y-4'>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>1. 安装 Claude Code</h3>
@@ -208,135 +308,42 @@ export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
                       </div>
                     </div>
                   </div>
-                </Section>
-              </TabsContent>
-            </Tabs>
-          </Section>
-
-          <Section title='OpenAI Codex CLI' id='codex'>
-            <Tabs defaultValue='mac'>
-              <TabsList className='mb-6 flex flex-wrap'>
-                <TabsTrigger value='mac'>macOS</TabsTrigger>
-                <TabsTrigger value='windows'>Windows</TabsTrigger>
-                <TabsTrigger value='linux'>Linux</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value='mac' className='space-y-6'>
-                <Section title='macOS' id='codex-mac'>
-                  <div className='space-y-4'>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>1. 安装 Homebrew</h3>
-                      <CodeBlock>{`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`}</CodeBlock>
-                    </div>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>2. 安装 Node.js</h3>
-                      <CodeBlock>{`brew update
-brew install node`}</CodeBlock>
-                    </div>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>3. 安装 Codex CLI</h3>
-                      <CodeBlock>{`npm install -g @openai/codex`}</CodeBlock>
-                      <div className='mt-3'>
-                        <CodeBlock>{`codex --version`}</CodeBlock>
-                      </div>
-                    </div>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>4. 配置</h3>
-                      <CodeBlock>{`curl -fsSL https://raw.githubusercontent.com/QuantumNous/new-api-docs/refs/heads/main/helper/codex-cli-setup.sh | bash`}</CodeBlock>
-                    </div>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>5. 开始使用</h3>
-                      <CodeBlock>{`codex`}</CodeBlock>
-                      <div className='mt-3'>
-                        <CodeBlock>{`cd /path/to/your/project`}</CodeBlock>
-                      </div>
-                      <div className='mt-3'>
-                        <CodeBlock>{`codex`}</CodeBlock>
-                      </div>
-                      <div className='mt-3'>
-                        <CodeBlock>{`/model`}</CodeBlock>
-                      </div>
-                    </div>
-                  </div>
-                </Section>
-              </TabsContent>
-
-              <TabsContent value='windows' className='space-y-6'>
-                <Section title='Windows' id='codex-windows'>
-                  <div className='space-y-4'>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>1. 打开终端</h3>
-                      <CodeBlock>{`wsl`}</CodeBlock>
-                    </div>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>2. 安装 WSL2</h3>
-                      <CodeBlock>{`wsl --install`}</CodeBlock>
-                    </div>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>3. 安装 Node 22</h3>
-                      <CodeBlock>{`curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
-nvm install 22`}</CodeBlock>
-                    </div>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>4. 安装 Codex CLI</h3>
-                      <CodeBlock>{`npm i -g @openai/codex`}</CodeBlock>
-                    </div>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>5. 配置</h3>
-                      <CodeBlock>{`iex (irm 'https://raw.githubusercontent.com/QuantumNous/new-api-docs/refs/heads/main/helper/codex-cli-setup.ps1')`}</CodeBlock>
-                    </div>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>6. 开始使用</h3>
-                      <CodeBlock>{`wsl`}</CodeBlock>
-                      <div className='mt-3'>
-                        <CodeBlock>{`codex`}</CodeBlock>
-                      </div>
-                      <div className='mt-3'>
-                        <CodeBlock>{`cd /mnt/c/path/to/your/project
-codex`}</CodeBlock>
-                      </div>
-                      <div className='mt-3'>
-                        <CodeBlock>{`/model`}</CodeBlock>
-                      </div>
-                    </div>
-                  </div>
-                </Section>
-              </TabsContent>
-
-              <TabsContent value='linux' className='space-y-6'>
-                <Section title='Linux' id='codex-linux'>
-                  <div className='space-y-4'>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>1. 安装 Node.js</h3>
-                      <CodeBlock>{`sudo curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+                  </Section>
+                ) : (
+                  <Section title='Linux' id='codex-linux'>
+                    <div className='space-y-4'>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>1. 安装 Node.js</h3>
+                        <CodeBlock>{`sudo curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
 sudo apt-get install -y nodejs`}</CodeBlock>
-                    </div>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>2. 安装 Codex CLI</h3>
-                      <CodeBlock>{`npm i -g @openai/codex`}</CodeBlock>
-                      <div className='mt-3'>
-                        <CodeBlock>{`codex --version`}</CodeBlock>
                       </div>
-                    </div>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>3. 配置</h3>
-                      <CodeBlock>{`curl -fsSL https://raw.githubusercontent.com/QuantumNous/new-api-docs/refs/heads/main/helper/codex-cli-setup.sh | bash`}</CodeBlock>
-                    </div>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>4. 开始使用</h3>
-                      <CodeBlock>{`codex`}</CodeBlock>
-                      <div className='mt-3'>
-                        <CodeBlock>{`cd /path/to/your/project`}</CodeBlock>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>2. 安装 Codex CLI</h3>
+                        <CodeBlock>{`npm i -g @openai/codex`}</CodeBlock>
+                        <div className='mt-3'>
+                          <CodeBlock>{`codex --version`}</CodeBlock>
+                        </div>
                       </div>
-                      <div className='mt-3'>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>3. 配置</h3>
+                        <CodeBlock>{`curl -fsSL https://raw.githubusercontent.com/QuantumNous/new-api-docs/refs/heads/main/helper/codex-cli-setup.sh | bash`}</CodeBlock>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>4. 开始使用</h3>
                         <CodeBlock>{`codex`}</CodeBlock>
-                      </div>
-                      <div className='mt-3'>
-                        <CodeBlock>{`/model`}</CodeBlock>
+                        <div className='mt-3'>
+                          <CodeBlock>{`cd /path/to/your/project`}</CodeBlock>
+                        </div>
+                        <div className='mt-3'>
+                          <CodeBlock>{`codex`}</CodeBlock>
+                        </div>
+                        <div className='mt-3'>
+                          <CodeBlock>{`/model`}</CodeBlock>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Section>
+                  </Section>
+                )}
               </TabsContent>
             </Tabs>
           </Section>
