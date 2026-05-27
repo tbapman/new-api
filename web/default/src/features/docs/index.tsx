@@ -60,7 +60,7 @@ export function Docs() {
           </div>
           <h1 className='text-3xl font-bold tracking-tight'>{t('Documentation')}</h1>
           <p className='max-w-3xl text-muted-foreground'>
-            Claude Code 接入 New API 的复制即用命令。
+            Claude Code 和 Codex CLI 接入 New API 的复制即用命令。
           </p>
         </div>
 
@@ -68,9 +68,9 @@ export function Docs() {
           <button className='inline-flex items-center gap-2 rounded-lg border border-primary bg-primary px-4 py-2 text-sm font-medium text-primary-foreground'>
             Claude Code
           </button>
-          <span className='inline-flex items-center gap-1 rounded-lg border border-dashed px-4 py-2 text-sm text-muted-foreground'>
-            Codex <Badge variant='outline' className='text-xs'>{t('Coming soon')}</Badge>
-          </span>
+          <button className='inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium text-muted-foreground'>
+            Codex CLI
+          </button>
         </div>
 
         <div className='space-y-6'>
@@ -202,6 +202,134 @@ export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
                       <CodeBlock>{`claude`}</CodeBlock>
                       <div className='mt-3'>
                         <CodeBlock>{`cd /path/to/your/project`}</CodeBlock>
+                      </div>
+                      <div className='mt-3'>
+                        <CodeBlock>{`/model`}</CodeBlock>
+                      </div>
+                    </div>
+                  </div>
+                </Section>
+              </TabsContent>
+            </Tabs>
+          </Section>
+
+          <Section title='OpenAI Codex CLI' id='codex'>
+            <Tabs defaultValue='mac'>
+              <TabsList className='mb-6 flex flex-wrap'>
+                <TabsTrigger value='mac'>macOS</TabsTrigger>
+                <TabsTrigger value='windows'>Windows</TabsTrigger>
+                <TabsTrigger value='linux'>Linux</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value='mac' className='space-y-6'>
+                <Section title='macOS' id='codex-mac'>
+                  <div className='space-y-4'>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>1. 安装 Homebrew</h3>
+                      <CodeBlock>{`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`}</CodeBlock>
+                    </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>2. 安装 Node.js</h3>
+                      <CodeBlock>{`brew update
+brew install node`}</CodeBlock>
+                    </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>3. 安装 Codex CLI</h3>
+                      <CodeBlock>{`npm install -g @openai/codex`}</CodeBlock>
+                      <div className='mt-3'>
+                        <CodeBlock>{`codex --version`}</CodeBlock>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>4. 配置</h3>
+                      <CodeBlock>{`curl -fsSL https://raw.githubusercontent.com/QuantumNous/new-api-docs/refs/heads/main/helper/codex-cli-setup.sh | bash`}</CodeBlock>
+                    </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>5. 开始使用</h3>
+                      <CodeBlock>{`codex`}</CodeBlock>
+                      <div className='mt-3'>
+                        <CodeBlock>{`cd /path/to/your/project`}</CodeBlock>
+                      </div>
+                      <div className='mt-3'>
+                        <CodeBlock>{`codex`}</CodeBlock>
+                      </div>
+                      <div className='mt-3'>
+                        <CodeBlock>{`/model`}</CodeBlock>
+                      </div>
+                    </div>
+                  </div>
+                </Section>
+              </TabsContent>
+
+              <TabsContent value='windows' className='space-y-6'>
+                <Section title='Windows' id='codex-windows'>
+                  <div className='space-y-4'>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>1. 打开终端</h3>
+                      <CodeBlock>{`wsl`}</CodeBlock>
+                    </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>2. 安装 WSL2</h3>
+                      <CodeBlock>{`wsl --install`}</CodeBlock>
+                    </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>3. 安装 Node 22</h3>
+                      <CodeBlock>{`curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
+nvm install 22`}</CodeBlock>
+                    </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>4. 安装 Codex CLI</h3>
+                      <CodeBlock>{`npm i -g @openai/codex`}</CodeBlock>
+                    </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>5. 配置</h3>
+                      <CodeBlock>{`iex (irm 'https://raw.githubusercontent.com/QuantumNous/new-api-docs/refs/heads/main/helper/codex-cli-setup.ps1')`}</CodeBlock>
+                    </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>6. 开始使用</h3>
+                      <CodeBlock>{`wsl`}</CodeBlock>
+                      <div className='mt-3'>
+                        <CodeBlock>{`codex`}</CodeBlock>
+                      </div>
+                      <div className='mt-3'>
+                        <CodeBlock>{`cd /mnt/c/path/to/your/project
+codex`}</CodeBlock>
+                      </div>
+                      <div className='mt-3'>
+                        <CodeBlock>{`/model`}</CodeBlock>
+                      </div>
+                    </div>
+                  </div>
+                </Section>
+              </TabsContent>
+
+              <TabsContent value='linux' className='space-y-6'>
+                <Section title='Linux' id='codex-linux'>
+                  <div className='space-y-4'>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>1. 安装 Node.js</h3>
+                      <CodeBlock>{`sudo curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+sudo apt-get install -y nodejs`}</CodeBlock>
+                    </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>2. 安装 Codex CLI</h3>
+                      <CodeBlock>{`npm i -g @openai/codex`}</CodeBlock>
+                      <div className='mt-3'>
+                        <CodeBlock>{`codex --version`}</CodeBlock>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>3. 配置</h3>
+                      <CodeBlock>{`curl -fsSL https://raw.githubusercontent.com/QuantumNous/new-api-docs/refs/heads/main/helper/codex-cli-setup.sh | bash`}</CodeBlock>
+                    </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>4. 开始使用</h3>
+                      <CodeBlock>{`codex`}</CodeBlock>
+                      <div className='mt-3'>
+                        <CodeBlock>{`cd /path/to/your/project`}</CodeBlock>
+                      </div>
+                      <div className='mt-3'>
+                        <CodeBlock>{`codex`}</CodeBlock>
                       </div>
                       <div className='mt-3'>
                         <CodeBlock>{`/model`}</CodeBlock>
