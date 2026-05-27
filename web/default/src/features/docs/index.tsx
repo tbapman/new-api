@@ -90,12 +90,16 @@ export function Docs() {
                       <CodeBlock>{`curl -fsSL https://claude.ai/install.sh | bash`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>2. 环境变量</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>2. 获取 API 密钥</h3>
+                      <CodeBlock>{`https://www.modelbridge.cloud/keys`}</CodeBlock>
+                    </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>3. 环境变量</h3>
                       <CodeBlock>{`export ANTHROPIC_BASE_URL='https://www.modelbridge.cloud'
 export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>3. 开始使用 Claude Code</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>4. 开始使用 Claude Code</h3>
                       <CodeBlock>{`claude`}</CodeBlock>
                       <div className='mt-3'>
                         <CodeBlock>{`cd /path/to/your/project`}</CodeBlock>
@@ -149,12 +153,16 @@ npm --version`}</CodeBlock>
                       </div>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>4. 环境变量</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>4. 获取 API 密钥</h3>
+                      <CodeBlock>{`https://www.modelbridge.cloud/keys`}</CodeBlock>
+                    </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>5. 环境变量</h3>
                       <CodeBlock>{`export ANTHROPIC_BASE_URL='https://www.modelbridge.cloud'
 export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>5. 开始使用 Claude Code</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>6. 开始使用 Claude Code</h3>
                       <CodeBlock>{`claude`}</CodeBlock>
                       <div className='mt-3'>
                         <CodeBlock>{`cd C:\\path\\to\\your\\project`}</CodeBlock>
@@ -181,12 +189,16 @@ export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
                       </div>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>2. 环境变量</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>2. 获取 API 密钥</h3>
+                      <CodeBlock>{`https://www.modelbridge.cloud/keys`}</CodeBlock>
+                    </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>3. 环境变量</h3>
                       <CodeBlock>{`export ANTHROPIC_BASE_URL='https://www.modelbridge.cloud'
 export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>3. 开始使用 Claude Code</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>4. 开始使用 Claude Code</h3>
                       <CodeBlock>{`claude`}</CodeBlock>
                       <div className='mt-3'>
                         <CodeBlock>{`cd /path/to/your/project`}</CodeBlock>
