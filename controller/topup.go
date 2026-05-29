@@ -31,9 +31,9 @@ type TopupFeeInfo struct {
 	CnyPayAmount float64
 }
 
-// computeTopupFee calculates the CNY payment breakdown using the tiered fee config.
-// When fee config is disabled it falls back to the legacy Price-based formula so
-// that existing deployments are unaffected.
+// computeTopupFee calculates the fee deduction breakdown using the tiered fee config.
+// The user pays amount×exchangeRate (no surcharge); the fee is deducted from credited quota.
+// When fee config is disabled it falls back to the legacy Price-based formula.
 func computeTopupFee(usdAmount float64, group string) TopupFeeInfo {
 	feeCfg := operation_setting.GetRechargeFeeConfig()
 	topupGroupRatio := common.GetTopupGroupRatio(group)
@@ -62,7 +62,8 @@ func computeTopupFee(usdAmount float64, group string) TopupFeeInfo {
 	dExchangeRate := decimal.NewFromFloat(exchangeRate)
 	dGroupRatio := decimal.NewFromFloat(topupGroupRatio)
 
-	cnyPayAmount := dAmount.Add(dFeeAmount).Mul(dExchangeRate).Mul(dGroupRatio).InexactFloat64()
+	// User pays the flat amount only — no surcharge. Fee is deducted from credited quota.
+	cnyPayAmount := dAmount.Mul(dExchangeRate).Mul(dGroupRatio).InexactFloat64()
 
 	return TopupFeeInfo{
 		FeeRate:      feeRate,
@@ -486,9 +487,7 @@ func EpayNotify(c *gin.Context) {
 			}
 			//user, _ := model.GetUserById(topUp.UserId, false)
 			//user.Quota += topUp.Amount * 500000
-			dAmount := decimal.NewFromInt(int64(topUp.Amount))
-			dQuotaPerUnit := decimal.NewFromFloat(common.QuotaPerUnit)
-			quotaToAdd := int(dAmount.Mul(dQuotaPerUnit).IntPart())
+			quotaToAdd := model.QuotaToCredit(decimal.NewFromInt(int64(topUp.Amount)), topUp.FeeRate)
 			err = model.IncreaseUserQuota(topUp.UserId, quotaToAdd, true)
 			if err != nil {
 				logger.LogError(c.Request.Context(), fmt.Sprintf("易支付 更新用户额度失败 trade_no=%s user_id=%d client_ip=%s quota_to_add=%d error=%q topup=%q", topUp.TradeNo, topUp.UserId, c.ClientIP(), quotaToAdd, err.Error(), common.GetJsonString(topUp)))
@@ -555,10 +554,12 @@ func GetTopUpFeePreview(c *gin.Context) {
 	}
 
 	feeInfo := computeTopupFee(usdAmount, group)
+	creditedUSD := decimal.NewFromFloat(usdAmount).Sub(decimal.NewFromFloat(feeInfo.FeeAmount)).Round(4).InexactFloat64()
 	common.ApiSuccess(c, gin.H{
 		"amount":        usdAmount,
 		"fee_rate":      feeInfo.FeeRate,
 		"fee_amount":    feeInfo.FeeAmount,
+		"credited_usd":  creditedUSD,
 		"exchange_rate": feeInfo.ExchangeRate,
 		"pay_amount_cny": decimal.NewFromFloat(feeInfo.CnyPayAmount).Round(2).InexactFloat64(),
 	})

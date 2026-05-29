@@ -28,6 +28,8 @@ export interface FeePreviewData {
   amount: number
   fee_rate: number
   fee_amount: number
+  /** USD amount credited to user's quota after fee deduction */
+  credited_usd: number
   exchange_rate: number
   pay_amount_cny: number
 }

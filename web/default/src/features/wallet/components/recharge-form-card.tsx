@@ -213,7 +213,7 @@ export function RechargeFormCard({
         topupInfo.recharge_fee_rules.length > 0 && (
           <div className='rounded-lg border bg-muted/30 px-3 py-2.5'>
             <p className='text-muted-foreground mb-2 text-xs font-medium'>
-              充值越多，手续费率越低
+              充值越多，到账比例越高（手续费从到账额度中扣除）
             </p>
             <div className='flex flex-wrap gap-x-4 gap-y-1'>
               {topupInfo.recharge_fee_rules.map((rule, i) => (
@@ -323,15 +323,15 @@ export function RechargeFormCard({
                       ) : feePreview ? (
                         <>
                           <span className='text-muted-foreground text-xs'>
-                            手续费率: {formatFeeRate(feePreview.fee_rate)}
-                            {' · '}
-                            手续费: ${feePreview.fee_amount.toFixed(2)}
+                            支付: ¥{feePreview.pay_amount_cny.toFixed(2)}
+                            {'（'}汇率 {feePreview.exchange_rate}{'）'}
                           </span>
                           <span className='text-muted-foreground text-xs'>
-                            汇率: {feePreview.exchange_rate}
+                            手续费 {formatFeeRate(feePreview.fee_rate)}
+                            {feePreview.fee_rate > 0 && `（-$${feePreview.fee_amount.toFixed(2)}）`}
                           </span>
-                          <span className='text-sm font-semibold'>
-                            ¥{feePreview.pay_amount_cny.toFixed(2)}
+                          <span className='text-sm font-semibold text-green-700 dark:text-green-400'>
+                            实际到账 ${feePreview.credited_usd.toFixed(4)}
                           </span>
                         </>
                       ) : (

@@ -11,6 +11,24 @@ import (
 	"gorm.io/gorm"
 )
 
+// QuotaToCredit computes how much quota to actually credit after deducting any
+// stored fee. baseAmount is the amount in USD used as the quota base; feeRate is
+// the decimal fee fraction stored on the order (0 when fee system is disabled).
+// Negative results are clamped to zero.
+func QuotaToCredit(baseAmount decimal.Decimal, feeRate float64) int {
+	dFeeRate := decimal.NewFromFloat(feeRate)
+	credited := baseAmount.Mul(decimal.NewFromFloat(1).Sub(dFeeRate))
+	if credited.IsNegative() {
+		credited = decimal.Zero
+	}
+	return int(credited.Mul(decimal.NewFromFloat(common.QuotaPerUnit)).IntPart())
+}
+
+// quotaToCredit is the unexported alias used internally by this package.
+func quotaToCredit(baseAmount decimal.Decimal, feeRate float64) int {
+	return QuotaToCredit(baseAmount, feeRate)
+}
+
 type TopUp struct {
 	Id              int     `json:"id"`
 	UserId          int     `json:"user_id" gorm:"index"`
@@ -148,7 +166,8 @@ func Recharge(referenceId string, customerId string, callerIp string) (err error
 			return err
 		}
 
-		quota = topUp.Money * common.QuotaPerUnit
+		// Stripe stores Money in USD; apply fee deduction to compute credited quota.
+		quota = float64(quotaToCredit(decimal.NewFromFloat(topUp.Money), topUp.FeeRate))
 		err = tx.Model(&User{}).Where("id = ?", topUp.UserId).Updates(map[string]interface{}{"stripe_customer": customerId, "quota": gorm.Expr("quota + ?", quota)}).Error
 		if err != nil {
 			return err
@@ -356,16 +375,13 @@ func ManualCompleteTopUp(tradeNo string, callerIp string) error {
 			return errors.New("订单状态不是待支付，无法补单")
 		}
 
-		// 计算应充值额度：
-		// - Stripe 订单：Money 代表经分组倍率换算后的美元数量，直接 * QuotaPerUnit
-		// - 其他订单（如易支付）：Amount 为美元数量，* QuotaPerUnit
+		// 计算应充值额度（扣除手续费）：
+		// - Stripe 订单：Money 代表经分组倍率换算后的美元数量
+		// - 其他订单（如易支付）：Amount 为美元数量
 		if topUp.PaymentProvider == PaymentProviderStripe {
-			dQuotaPerUnit := decimal.NewFromFloat(common.QuotaPerUnit)
-			quotaToAdd = int(decimal.NewFromFloat(topUp.Money).Mul(dQuotaPerUnit).IntPart())
+			quotaToAdd = quotaToCredit(decimal.NewFromFloat(topUp.Money), topUp.FeeRate)
 		} else {
-			dAmount := decimal.NewFromInt(topUp.Amount)
-			dQuotaPerUnit := decimal.NewFromFloat(common.QuotaPerUnit)
-			quotaToAdd = int(dAmount.Mul(dQuotaPerUnit).IntPart())
+			quotaToAdd = quotaToCredit(decimal.NewFromInt(topUp.Amount), topUp.FeeRate)
 		}
 		if quotaToAdd <= 0 {
 			return errors.New("无效的充值额度")
@@ -504,8 +520,7 @@ func RechargeWaffo(tradeNo string, callerIp string) (err error) {
 		}
 
 		dAmount := decimal.NewFromInt(topUp.Amount)
-		dQuotaPerUnit := decimal.NewFromFloat(common.QuotaPerUnit)
-		quotaToAdd = int(dAmount.Mul(dQuotaPerUnit).IntPart())
+		quotaToAdd = quotaToCredit(dAmount, topUp.FeeRate)
 		if quotaToAdd <= 0 {
 			return errors.New("无效的充值额度")
 		}
@@ -566,7 +581,7 @@ func RechargeWaffoPancake(tradeNo string) (err error) {
 			return errors.New("充值订单状态错误")
 		}
 
-		quotaToAdd = int(decimal.NewFromInt(topUp.Amount).Mul(decimal.NewFromFloat(common.QuotaPerUnit)).IntPart())
+		quotaToAdd = quotaToCredit(decimal.NewFromInt(topUp.Amount), topUp.FeeRate)
 		if quotaToAdd <= 0 {
 			return errors.New("无效的充值额度")
 		}
@@ -625,8 +640,7 @@ func RechargeAlipay(tradeNo string, callerIp string) (err error) {
 		}
 
 		dAmount := decimal.NewFromInt(topUp.Amount)
-		dQuotaPerUnit := decimal.NewFromFloat(common.QuotaPerUnit)
-		quotaToAdd = int(dAmount.Mul(dQuotaPerUnit).IntPart())
+		quotaToAdd = quotaToCredit(dAmount, topUp.FeeRate)
 		if quotaToAdd <= 0 {
 			return errors.New("无效的充值额度")
 		}
@@ -681,8 +695,7 @@ func RechargeWxpay(tradeNo string, callerIp string) (err error) {
 		}
 
 		dAmount := decimal.NewFromInt(topUp.Amount)
-		dQuotaPerUnit := decimal.NewFromFloat(common.QuotaPerUnit)
-		quotaToAdd = int(dAmount.Mul(dQuotaPerUnit).IntPart())
+		quotaToAdd = quotaToCredit(dAmount, topUp.FeeRate)
 		if quotaToAdd <= 0 {
 			return errors.New("无效的充值额度")
 		}
