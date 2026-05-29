@@ -186,6 +186,32 @@ const BILLING_SECTIONS = [
           WaffoPancakeUnitPrice: settings.WaffoPancakeUnitPrice ?? 1,
           WaffoPancakeMinTopUp: settings.WaffoPancakeMinTopUp ?? 1,
         }}
+        rechargeFeeDefaultValues={(() => {
+          let feeRules: Array<{
+            min_amount: number
+            max_amount: number
+            fee_rate: number
+          }> = []
+          try {
+            const raw = settings['recharge_fee_config.fee_rules']
+            if (raw) feeRules = JSON.parse(raw)
+          } catch {
+            // use empty array on parse error
+          }
+          return {
+            enabled: settings['recharge_fee_config.enabled'] ?? false,
+            min_topup_usd: settings['recharge_fee_config.min_topup_usd'] ?? 5,
+            fee_rules: feeRules.length > 0
+              ? feeRules
+              : [
+                  { min_amount: 5, max_amount: 10, fee_rate: 0.03 },
+                  { min_amount: 10, max_amount: 50, fee_rate: 0.02 },
+                  { min_amount: 50, max_amount: 200, fee_rate: 0.015 },
+                  { min_amount: 200, max_amount: 1000, fee_rate: 0.01 },
+                  { min_amount: 1000, max_amount: -1, fee_rate: 0 },
+                ],
+          }
+        })()}
       />
     ),
   },

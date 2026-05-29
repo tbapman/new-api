@@ -22,6 +22,8 @@ import type {
   WaffoPancakePaymentResponse,
   AlipayPaymentResponse,
   WxpayPaymentResponse,
+  FeePreviewRequest,
+  FeePreviewResponse,
 } from './types'
 
 // ============================================================================
@@ -40,6 +42,18 @@ export function isApiSuccess(response: ApiResponse): boolean {
  */
 export async function getTopupInfo(): Promise<TopupInfoResponse> {
   const res = await api.get('/api/user/topup/info')
+  return res.data
+}
+
+/**
+ * Preview tiered fee breakdown for a given USD topup amount
+ */
+export async function previewTopupFee(
+  request: FeePreviewRequest
+): Promise<FeePreviewResponse> {
+  const res = await api.post('/api/user/topup/preview', request, {
+    skipBusinessError: true,
+  } as Record<string, unknown>)
   return res.data
 }
 

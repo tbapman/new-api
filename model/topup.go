@@ -22,6 +22,12 @@ type TopUp struct {
 	CreateTime      int64   `json:"create_time"`
 	CompleteTime    int64   `json:"complete_time"`
 	Status          string  `json:"status"`
+	// Tiered fee fields (populated when recharge_fee_config.enabled = true)
+	FeeRate      float64 `json:"fee_rate"       gorm:"default:0"`
+	FeeAmount    float64 `json:"fee_amount"     gorm:"default:0"`
+	ExchangeRate float64 `json:"exchange_rate"  gorm:"default:0"`
+	UsdAmount    float64 `json:"usd_amount"     gorm:"default:0"`
+	CnyPayAmount float64 `json:"cny_pay_amount" gorm:"default:0"`
 }
 
 const (

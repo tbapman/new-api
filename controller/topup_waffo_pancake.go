@@ -158,9 +158,10 @@ func RequestWaffoPancakePay(c *gin.Context) {
 	}
 
 	tradeNo := fmt.Sprintf("WAFFO_PANCAKE-%d-%d-%s", id, time.Now().UnixMilli(), randstr.String(6))
+	normalizedAmount := normalizeWaffoPancakeTopUpAmount(req.Amount)
 	topUp := &model.TopUp{
 		UserId:          id,
-		Amount:          normalizeWaffoPancakeTopUpAmount(req.Amount),
+		Amount:          normalizedAmount,
 		Money:           payMoney,
 		TradeNo:         tradeNo,
 		PaymentMethod:   model.PaymentMethodWaffoPancake,
@@ -168,6 +169,13 @@ func RequestWaffoPancakePay(c *gin.Context) {
 		CreateTime:      time.Now().Unix(),
 		Status:          common.TopUpStatusPending,
 	}
+	// Capture tiered fee info for audit
+	feeInfo := computeTopupFee(float64(normalizedAmount), group)
+	topUp.FeeRate = feeInfo.FeeRate
+	topUp.FeeAmount = feeInfo.FeeAmount
+	topUp.UsdAmount = feeInfo.UsdAmount
+	topUp.ExchangeRate = feeInfo.ExchangeRate
+	topUp.CnyPayAmount = decimal.NewFromFloat(feeInfo.CnyPayAmount).Round(2).InexactFloat64()
 	if err := topUp.Insert(); err != nil {
 		logger.LogError(c.Request.Context(), fmt.Sprintf("Waffo Pancake 创建充值订单失败 user_id=%d trade_no=%s amount=%d error=%q", id, tradeNo, req.Amount, err.Error()))
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "创建订单失败"})

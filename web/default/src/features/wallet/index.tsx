@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getSelf } from '@/lib/api'
 import { useStatus } from '@/hooks/use-status'
@@ -30,11 +30,13 @@ import {
   getMinTopupAmount,
   isWaffoPancakePayment,
 } from './lib'
+import { previewTopupFee } from './api'
 import type {
   UserWalletData,
   PaymentMethod,
   PresetAmount,
   CreemProduct,
+  FeePreviewData,
 } from './types'
 
 interface WalletProps {
@@ -58,6 +60,9 @@ export function Wallet(props: WalletProps) {
   const [selectedCreemProduct, setSelectedCreemProduct] =
     useState<CreemProduct | null>(null)
   const [showSubscriptionPanel, setShowSubscriptionPanel] = useState(true)
+  const [feePreview, setFeePreview] = useState<FeePreviewData | null>(null)
+  const [feeCalculating, setFeeCalculating] = useState(false)
+  const feeDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const { status } = useStatus()
   const { currency } = useSystemConfig()
@@ -148,6 +153,31 @@ export function Wallet(props: WalletProps) {
       }
     }
   }, [topupInfo, topupAmount, calculatePaymentAmount, calculateAlipayPaymentAmount, calculateWxpayPaymentAmount])
+
+  // Debounced fee preview when fee config is enabled and amount changes
+  useEffect(() => {
+    if (!topupInfo?.recharge_fee_enabled || topupAmount <= 0) {
+      setFeePreview(null)
+      return
+    }
+    if (feeDebounceRef.current) clearTimeout(feeDebounceRef.current)
+    setFeeCalculating(true)
+    feeDebounceRef.current = setTimeout(async () => {
+      try {
+        const res = await previewTopupFee({ amount: topupAmount })
+        if (res.success && res.data) {
+          setFeePreview(res.data)
+        }
+      } catch {
+        // silent — preview is best-effort
+      } finally {
+        setFeeCalculating(false)
+      }
+    }, 300)
+    return () => {
+      if (feeDebounceRef.current) clearTimeout(feeDebounceRef.current)
+    }
+  }, [topupAmount, topupInfo?.recharge_fee_enabled])
 
   // Dispatch amount calculation to the right provider
   const dispatchCalculateAmount = useCallback(
@@ -357,6 +387,9 @@ export function Wallet(props: WalletProps) {
                   enableWaffoPancakeTopup={
                     topupInfo?.enable_waffo_pancake_topup
                   }
+                  rechargeFeeEnabled={topupInfo?.recharge_fee_enabled}
+                  feePreview={feePreview}
+                  feeCalculating={feeCalculating}
                 />
               </div>
 

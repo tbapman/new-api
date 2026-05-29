@@ -3,6 +3,36 @@
 // ============================================================================
 
 /**
+ * Single tier of the recharge fee table
+ */
+export interface RechargeFeeRule {
+  /** Inclusive lower bound (USD) */
+  min_amount: number
+  /** Exclusive upper bound (USD); -1 means no upper bound */
+  max_amount: number
+  /** Decimal fraction, e.g. 0.03 = 3% */
+  fee_rate: number
+}
+
+/**
+ * Fee preview request
+ */
+export interface FeePreviewRequest {
+  amount: number
+}
+
+/**
+ * Fee preview response data
+ */
+export interface FeePreviewData {
+  amount: number
+  fee_rate: number
+  fee_amount: number
+  exchange_rate: number
+  pay_amount_cny: number
+}
+
+/**
  * Generic API response
  */
 export interface ApiResponse<T = unknown> {
@@ -24,6 +54,7 @@ export type StripePaymentResponse = ApiResponse<{ pay_link: string }>
 export type AffiliateCodeResponse = ApiResponse<string>
 export type AffiliateTransferResponse = ApiResponse
 export type CreemPaymentResponse = ApiResponse<{ checkout_url: string }>
+export type FeePreviewResponse = ApiResponse<FeePreviewData>
 export type WaffoPaymentResponse = ApiResponse<
   { payment_url?: string } | string
 >
@@ -137,6 +168,12 @@ export interface TopupInfo {
   enable_wxpay_topup?: boolean
   /** Minimum topup amount for WeChat Pay */
   wxpay_min_topup?: number
+  /** Whether tiered recharge fee is enabled */
+  recharge_fee_enabled?: boolean
+  /** Minimum topup amount when fee is enabled (USD) */
+  recharge_fee_min_usd?: number
+  /** Tiered fee rules for display */
+  recharge_fee_rules?: RechargeFeeRule[]
 }
 
 /**
@@ -252,6 +289,16 @@ export interface TopupRecord {
   complete_time?: number
   /** Payment status */
   status: TopupStatus
+  /** Fee rate applied (decimal, e.g. 0.015 = 1.5%) */
+  fee_rate?: number
+  /** Fee amount in USD */
+  fee_amount?: number
+  /** Exchange rate at time of order */
+  exchange_rate?: number
+  /** USD topup amount */
+  usd_amount?: number
+  /** CNY payment amount */
+  cny_pay_amount?: number
 }
 
 /**

@@ -217,6 +217,13 @@ func RequestWaffoPay(c *gin.Context) {
 		CreateTime:      time.Now().Unix(),
 		Status:          common.TopUpStatusPending,
 	}
+	// Capture fee info for audit
+	feeInfo := computeTopupFee(float64(amount), group)
+	topUp.FeeRate = feeInfo.FeeRate
+	topUp.FeeAmount = feeInfo.FeeAmount
+	topUp.UsdAmount = feeInfo.UsdAmount
+	topUp.ExchangeRate = feeInfo.ExchangeRate
+	topUp.CnyPayAmount = feeInfo.CnyPayAmount
 	if err := topUp.Insert(); err != nil {
 		logger.LogError(c.Request.Context(), fmt.Sprintf("Waffo 创建充值订单失败 user_id=%d trade_no=%s amount=%d error=%q", id, merchantOrderId, req.Amount, err.Error()))
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "创建订单失败"})

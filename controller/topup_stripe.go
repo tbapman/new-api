@@ -110,6 +110,14 @@ func (*StripeAdaptor) RequestPay(c *gin.Context, req *StripePayRequest) {
 		CreateTime:      time.Now().Unix(),
 		Status:          common.TopUpStatusPending,
 	}
+	// Capture fee info for audit (fee not applied to Stripe USD charge in this flow)
+	if feeInfo := computeTopupFee(float64(req.Amount), user.Group); feeInfo.FeeRate > 0 {
+		topUp.FeeRate = feeInfo.FeeRate
+		topUp.FeeAmount = feeInfo.FeeAmount
+		topUp.UsdAmount = feeInfo.UsdAmount
+		topUp.ExchangeRate = feeInfo.ExchangeRate
+		topUp.CnyPayAmount = feeInfo.CnyPayAmount
+	}
 	err = topUp.Insert()
 	if err != nil {
 		logger.LogError(c.Request.Context(), fmt.Sprintf("Stripe 创建充值订单失败 user_id=%d trade_no=%s amount=%d error=%q", id, referenceId, req.Amount, err.Error()))

@@ -38,6 +38,10 @@ import {
   WaffoSettingsSection,
   type WaffoSettingsValues,
 } from './waffo-settings-section'
+import {
+  RechargeFeeRulesSection,
+  type RechargeFeeDefaultValues,
+} from './recharge-fee-rules-section'
 
 const paymentSchema = z.object({
   PayAddress: z.string().refine((value) => {
@@ -128,12 +132,14 @@ type PaymentSettingsSectionProps = {
   defaultValues: PaymentFormValues
   waffoDefaultValues: WaffoSettingsValues
   waffoPancakeDefaultValues: WaffoPancakeSettingsValues
+  rechargeFeeDefaultValues: RechargeFeeDefaultValues
 }
 
 export function PaymentSettingsSection({
   defaultValues,
   waffoDefaultValues,
   waffoPancakeDefaultValues,
+  rechargeFeeDefaultValues,
 }: PaymentSettingsSectionProps) {
   const { t } = useTranslation()
   const updateOption = useUpdateOption()
@@ -1856,6 +1862,10 @@ export function PaymentSettingsSection({
       <Separator />
 
       <WaffoPancakeSettingsSection defaultValues={waffoPancakeDefaultValues} />
+
+      <Separator />
+
+      <RechargeFeeRulesSection defaultValues={rechargeFeeDefaultValues} />
       {/* eslint-enable react-hooks/refs */}
     </SettingsSection>
   )

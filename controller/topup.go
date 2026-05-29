@@ -22,6 +22,57 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+// TopupFeeInfo holds the breakdown of a fee-based topup calculation.
+type TopupFeeInfo struct {
+	FeeRate      float64
+	FeeAmount    float64
+	UsdAmount    float64
+	ExchangeRate float64
+	CnyPayAmount float64
+}
+
+// computeTopupFee calculates the CNY payment breakdown using the tiered fee config.
+// When fee config is disabled it falls back to the legacy Price-based formula so
+// that existing deployments are unaffected.
+func computeTopupFee(usdAmount float64, group string) TopupFeeInfo {
+	feeCfg := operation_setting.GetRechargeFeeConfig()
+	topupGroupRatio := common.GetTopupGroupRatio(group)
+	if topupGroupRatio == 0 {
+		topupGroupRatio = 1
+	}
+
+	dAmount := decimal.NewFromFloat(usdAmount)
+
+	if !feeCfg.Enabled {
+		// Legacy formula: amount × Price × groupRatio
+		payMoney := dAmount.Mul(decimal.NewFromFloat(operation_setting.Price)).Mul(decimal.NewFromFloat(topupGroupRatio)).InexactFloat64()
+		return TopupFeeInfo{
+			UsdAmount:    usdAmount,
+			ExchangeRate: operation_setting.Price,
+			CnyPayAmount: payMoney,
+		}
+	}
+
+	feeRate := feeCfg.GetApplicableFeeRate(usdAmount)
+	dFeeRate := decimal.NewFromFloat(feeRate)
+	dFeeAmount := dAmount.Mul(dFeeRate)
+	feeAmount := dFeeAmount.InexactFloat64()
+
+	exchangeRate := operation_setting.USDExchangeRate
+	dExchangeRate := decimal.NewFromFloat(exchangeRate)
+	dGroupRatio := decimal.NewFromFloat(topupGroupRatio)
+
+	cnyPayAmount := dAmount.Add(dFeeAmount).Mul(dExchangeRate).Mul(dGroupRatio).InexactFloat64()
+
+	return TopupFeeInfo{
+		FeeRate:      feeRate,
+		FeeAmount:    feeAmount,
+		UsdAmount:    usdAmount,
+		ExchangeRate: exchangeRate,
+		CnyPayAmount: cnyPayAmount,
+	}
+}
+
 func GetTopUpInfo(c *gin.Context) {
 	// 获取支付方式
 	payMethods := operation_setting.PayMethods
@@ -153,6 +204,10 @@ func GetTopUpInfo(c *gin.Context) {
 		"amount_options":          operation_setting.GetPaymentSetting().AmountOptions,
 		"discount":                operation_setting.GetPaymentSetting().AmountDiscount,
 		"topup_link":              common.TopUpLink,
+		// Tiered fee config for frontend display
+		"recharge_fee_enabled": operation_setting.GetRechargeFeeConfig().Enabled,
+		"recharge_fee_min_usd": operation_setting.GetRechargeFeeConfig().MinTopUpUSD,
+		"recharge_fee_rules":   operation_setting.GetRechargeFeeConfig().FeeRules,
 	}
 	common.ApiSuccess(c, data)
 }
@@ -182,32 +237,27 @@ func GetEpayClient() *epay.Client {
 
 func getPayMoney(amount int64, group string) float64 {
 	dAmount := decimal.NewFromInt(amount)
-	// 充值金额以“展示类型”为准：
-	// - USD/CNY: 前端传 amount 为金额单位；TOKENS: 前端传 tokens，需要换成 USD 金额
+	// TOKENS display: convert token count → USD amount
 	if operation_setting.GetQuotaDisplayType() == operation_setting.QuotaDisplayTypeTokens {
 		dQuotaPerUnit := decimal.NewFromFloat(common.QuotaPerUnit)
 		dAmount = dAmount.Div(dQuotaPerUnit)
 	}
 
-	topupGroupRatio := common.GetTopupGroupRatio(group)
-	if topupGroupRatio == 0 {
-		topupGroupRatio = 1
-	}
+	usdAmount := dAmount.InexactFloat64()
+	feeInfo := computeTopupFee(usdAmount, group)
 
-	dTopupGroupRatio := decimal.NewFromFloat(topupGroupRatio)
-	dPrice := decimal.NewFromFloat(operation_setting.Price)
-	// apply optional preset discount by the original request amount (if configured), default 1.0
-	discount := 1.0
-	if ds, ok := operation_setting.GetPaymentSetting().AmountDiscount[int(amount)]; ok {
-		if ds > 0 {
-			discount = ds
+	// Apply optional preset discount (only in legacy mode; fee mode omits it for clarity)
+	if !operation_setting.GetRechargeFeeConfig().Enabled {
+		discount := 1.0
+		if ds, ok := operation_setting.GetPaymentSetting().AmountDiscount[int(amount)]; ok {
+			if ds > 0 {
+				discount = ds
+			}
 		}
+		return decimal.NewFromFloat(feeInfo.CnyPayAmount).Mul(decimal.NewFromFloat(discount)).InexactFloat64()
 	}
-	dDiscount := decimal.NewFromFloat(discount)
 
-	payMoney := dAmount.Mul(dPrice).Mul(dTopupGroupRatio).Mul(dDiscount)
-
-	return payMoney.InexactFloat64()
+	return feeInfo.CnyPayAmount
 }
 
 func getMinTopup() int64 {
@@ -279,6 +329,8 @@ func RequestEpay(c *gin.Context) {
 		dQuotaPerUnit := decimal.NewFromFloat(common.QuotaPerUnit)
 		amount = dAmount.Div(dQuotaPerUnit).IntPart()
 	}
+	usdAmountForFee := float64(amount)
+	feeInfo := computeTopupFee(usdAmountForFee, group)
 	topUp := &model.TopUp{
 		UserId:          id,
 		Amount:          amount,
@@ -288,6 +340,11 @@ func RequestEpay(c *gin.Context) {
 		PaymentProvider: model.PaymentProviderEpay,
 		CreateTime:      time.Now().Unix(),
 		Status:          common.TopUpStatusPending,
+		FeeRate:         feeInfo.FeeRate,
+		FeeAmount:       feeInfo.FeeAmount,
+		ExchangeRate:    feeInfo.ExchangeRate,
+		UsdAmount:       feeInfo.UsdAmount,
+		CnyPayAmount:    decimal.NewFromFloat(feeInfo.CnyPayAmount).Round(2).InexactFloat64(),
 	}
 	err = topUp.Insert()
 	if err != nil {
@@ -469,6 +526,42 @@ func RequestAmount(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "success", "data": strconv.FormatFloat(payMoney, 'f', 2, 64)})
+}
+
+// GetTopUpFeePreview returns the full fee breakdown for a given USD topup amount.
+func GetTopUpFeePreview(c *gin.Context) {
+	var req AmountRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		common.ApiErrorMsg(c, "参数错误")
+		return
+	}
+
+	feeCfg := operation_setting.GetRechargeFeeConfig()
+	usdAmount := float64(req.Amount)
+	if operation_setting.GetQuotaDisplayType() == operation_setting.QuotaDisplayTypeTokens {
+		usdAmount = decimal.NewFromInt(req.Amount).Div(decimal.NewFromFloat(common.QuotaPerUnit)).InexactFloat64()
+	}
+
+	if feeCfg.Enabled && usdAmount < feeCfg.MinTopUpUSD {
+		common.ApiErrorMsg(c, fmt.Sprintf("最低充值金额为 $%.0f", feeCfg.MinTopUpUSD))
+		return
+	}
+
+	id := c.GetInt("id")
+	group, err := model.GetUserGroup(id, true)
+	if err != nil {
+		common.ApiErrorMsg(c, "获取用户分组失败")
+		return
+	}
+
+	feeInfo := computeTopupFee(usdAmount, group)
+	common.ApiSuccess(c, gin.H{
+		"amount":        usdAmount,
+		"fee_rate":      feeInfo.FeeRate,
+		"fee_amount":    feeInfo.FeeAmount,
+		"exchange_rate": feeInfo.ExchangeRate,
+		"pay_amount_cny": decimal.NewFromFloat(feeInfo.CnyPayAmount).Round(2).InexactFloat64(),
+	})
 }
 
 func GetUserTopUps(c *gin.Context) {

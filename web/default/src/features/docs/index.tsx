@@ -162,7 +162,8 @@ brew install node`}</CodeBlock>
                       </div>
                       <div>
                         <h3 className='mb-2 text-sm font-semibold'>4. 配置</h3>
-                        <CodeBlock>{`curl -fsSL https://raw.githubusercontent.com/QuantumNous/new-api-docs/refs/heads/main/helper/codex-cli-setup.sh | bash`}</CodeBlock>
+                        <CodeBlock>{`export OPENAI_BASE_URL='https://www.modelbridge.cloud/v1'
+export OPENAI_API_KEY='sk-xxxx'`}</CodeBlock>
                       </div>
                       <div>
                         <h3 className='mb-2 text-sm font-semibold'>5. 开始使用</h3>
@@ -251,10 +252,11 @@ nvm install 22`}</CodeBlock>
                         <h3 className='mb-2 text-sm font-semibold'>4. 安装 Codex CLI</h3>
                         <CodeBlock>{`npm i -g @openai/codex`}</CodeBlock>
                       </div>
-                      <div>
-                        <h3 className='mb-2 text-sm font-semibold'>5. 配置</h3>
-                        <CodeBlock>{`iex (irm 'https://raw.githubusercontent.com/QuantumNous/new-api-docs/refs/heads/main/helper/codex-cli-setup.ps1')`}</CodeBlock>
-                      </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>5. 配置</h3>
+                      <CodeBlock>{`export OPENAI_BASE_URL='https://www.modelbridge.cloud/v1'
+export OPENAI_API_KEY='sk-xxxx'`}</CodeBlock>
+                    </div>
                       <div>
                         <h3 className='mb-2 text-sm font-semibold'>6. 开始使用</h3>
                         <CodeBlock>{`wsl`}</CodeBlock>
@@ -324,10 +326,11 @@ sudo apt-get install -y nodejs`}</CodeBlock>
                           <CodeBlock>{`codex --version`}</CodeBlock>
                         </div>
                       </div>
-                      <div>
-                        <h3 className='mb-2 text-sm font-semibold'>3. 配置</h3>
-                        <CodeBlock>{`curl -fsSL https://raw.githubusercontent.com/QuantumNous/new-api-docs/refs/heads/main/helper/codex-cli-setup.sh | bash`}</CodeBlock>
-                      </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>3. 配置</h3>
+                      <CodeBlock>{`export OPENAI_BASE_URL='https://www.modelbridge.cloud/v1'
+export OPENAI_API_KEY='sk-xxxx'`}</CodeBlock>
+                    </div>
                       <div>
                         <h3 className='mb-2 text-sm font-semibold'>4. 开始使用</h3>
                         <CodeBlock>{`codex`}</CodeBlock>

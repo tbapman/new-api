@@ -29,8 +29,20 @@ import type {
   TopupInfo,
   CreemProduct,
   WaffoPayMethod,
+  RechargeFeeRule,
+  FeePreviewData,
 } from '../types'
 import { CreemProductsSection } from './creem-products-section'
+
+function formatFeeRuleLabel(rule: RechargeFeeRule): string {
+  const min = `$${rule.min_amount}`
+  const max = rule.max_amount < 0 ? '+' : `–$${rule.max_amount}`
+  return `${min}${max}`
+}
+
+function formatFeeRate(rate: number): string {
+  return `${(rate * 100).toFixed(rate === 0 ? 0 : rate < 0.01 ? 2 : 1)}%`
+}
 
 interface RechargeFormCardProps {
   topupInfo: TopupInfo | null
@@ -60,6 +72,9 @@ interface RechargeFormCardProps {
   waffoMinTopup?: number
   onWaffoMethodSelect?: (method: WaffoPayMethod, index: number) => void
   enableWaffoPancakeTopup?: boolean
+  rechargeFeeEnabled?: boolean
+  feePreview?: FeePreviewData | null
+  feeCalculating?: boolean
 }
 
 export function RechargeFormCard({
@@ -90,6 +105,9 @@ export function RechargeFormCard({
   waffoMinTopup,
   onWaffoMethodSelect,
   enableWaffoPancakeTopup,
+  rechargeFeeEnabled,
+  feePreview,
+  feeCalculating,
 }: RechargeFormCardProps) {
   const { t } = useTranslation()
   const [localAmount, setLocalAmount] = useState(topupAmount.toString())
@@ -189,6 +207,29 @@ export function RechargeFormCard({
       }
       contentClassName='space-y-4 sm:space-y-6'
     >
+      {/* Tiered fee table — shown when fee system is enabled */}
+      {rechargeFeeEnabled &&
+        Array.isArray(topupInfo?.recharge_fee_rules) &&
+        topupInfo.recharge_fee_rules.length > 0 && (
+          <div className='rounded-lg border bg-muted/30 px-3 py-2.5'>
+            <p className='text-muted-foreground mb-2 text-xs font-medium'>
+              充值越多，手续费率越低
+            </p>
+            <div className='flex flex-wrap gap-x-4 gap-y-1'>
+              {topupInfo.recharge_fee_rules.map((rule, i) => (
+                <span key={i} className='text-xs'>
+                  <span className='font-medium'>
+                    {formatFeeRuleLabel(rule)}
+                  </span>
+                  <span className='text-muted-foreground ml-1'>
+                    {formatFeeRate(rule.fee_rate)}
+                  </span>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
       {/* Online Topup Section */}
       {hasAnyTopup ? (
         <div className='space-y-4 sm:space-y-6'>
@@ -261,7 +302,7 @@ export function RechargeFormCard({
                 >
                   {t('Custom Amount')}
                 </Label>
-                <div className='grid grid-cols-[minmax(0,1fr)_minmax(110px,0.55fr)] gap-2 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center'>
+                <div className='grid grid-cols-[minmax(0,1fr)_minmax(110px,0.55fr)] gap-2 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start'>
                   <Input
                     id='topup-amount'
                     type='number'
@@ -271,18 +312,48 @@ export function RechargeFormCard({
                     placeholder={`Minimum ${minTopup}`}
                     className='h-9 text-base sm:h-10 sm:text-lg'
                   />
-                  <div className='bg-muted/30 flex min-h-9 items-center justify-between gap-2 rounded-md border px-3 lg:min-w-52'>
-                    <span className='text-muted-foreground truncate text-xs'>
-                      {t('Amount to pay:')}
-                    </span>
-                    {calculating ? (
-                      <Skeleton className='h-5 w-16' />
-                    ) : (
-                      <span className='text-sm font-semibold'>
-                        {formatCurrency(paymentAmount)}
+                  {rechargeFeeEnabled ? (
+                    <div className='bg-muted/30 flex flex-col gap-1 rounded-md border px-3 py-2 lg:min-w-52'>
+                      {feeCalculating ? (
+                        <>
+                          <Skeleton className='h-3 w-24' />
+                          <Skeleton className='h-3 w-20' />
+                          <Skeleton className='h-4 w-28' />
+                        </>
+                      ) : feePreview ? (
+                        <>
+                          <span className='text-muted-foreground text-xs'>
+                            手续费率: {formatFeeRate(feePreview.fee_rate)}
+                            {' · '}
+                            手续费: ${feePreview.fee_amount.toFixed(2)}
+                          </span>
+                          <span className='text-muted-foreground text-xs'>
+                            汇率: {feePreview.exchange_rate}
+                          </span>
+                          <span className='text-sm font-semibold'>
+                            ¥{feePreview.pay_amount_cny.toFixed(2)}
+                          </span>
+                        </>
+                      ) : (
+                        <span className='text-muted-foreground text-xs'>
+                          {t('Enter amount to preview')}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <div className='bg-muted/30 flex min-h-9 items-center justify-between gap-2 rounded-md border px-3 lg:min-w-52'>
+                      <span className='text-muted-foreground truncate text-xs'>
+                        {t('Amount to pay:')}
                       </span>
-                    )}
-                  </div>
+                      {calculating ? (
+                        <Skeleton className='h-5 w-16' />
+                      ) : (
+                        <span className='text-sm font-semibold'>
+                          {formatCurrency(paymentAmount)}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
