@@ -124,7 +124,8 @@ export function ModelMutateDrawer({
   })
 
   // Fetch system options for ratio configuration
-  const { data: systemOptionsData } = useSystemOptions()
+  const { data: systemOptionsData, isLoading: isSystemOptionsLoading } =
+    useSystemOptions()
 
   const updateOption = useUpdateOption()
 
@@ -204,7 +205,7 @@ export function ModelMutateDrawer({
 
   const validateNumber = (value: string) => {
     if (value === '') return true
-    return !isNaN(parseFloat(value))
+    return /^(\d+(\.\d*)?|\.\d+)$/.test(value)
   }
 
   const handlePromptPriceChange = (value: string) => {
@@ -304,12 +305,23 @@ export function ModelMutateDrawer({
         // Determine pricing mode
         if (price !== undefined && price !== null) {
           setPricingMode('per-request')
+          setPricingSubMode('price')
           form.reset({
             ...baseModelData,
             price: price.toString(),
           })
         } else {
           setPricingMode('per-token')
+          setPricingSubMode(
+            ratio !== undefined ||
+              completionRatio !== undefined ||
+              cacheRatio !== undefined ||
+              imageRatio !== undefined ||
+              audioRatio !== undefined ||
+              audioCompletionRatio !== undefined
+              ? 'price'
+              : 'ratio'
+          )
           if (ratio !== undefined && ratio !== null) {
             const tokenPrice = ratio * 2
             setPromptPrice(tokenPrice.toString())
@@ -334,6 +346,7 @@ export function ModelMutateDrawer({
       } else {
         // If system settings not loaded yet, just load base model data
         setPricingMode('per-token')
+        setPricingSubMode('ratio')
         form.reset(baseModelData)
         setAdvancedOpen(false)
       }
@@ -370,6 +383,11 @@ export function ModelMutateDrawer({
     async (values: ExtendedModelFormValues): Promise<void> => {
       setIsSubmitting(true)
       try {
+        if (!modelSettings) {
+          toast.error(t('Failed to update setting'))
+          return
+        }
+
         const submitData = {
           ...values,
           id: isEditing ? currentRow!.id : undefined,
@@ -566,7 +584,12 @@ export function ModelMutateDrawer({
 
             // Apply all updates (including deletions when clearing fields)
             for (const update of updates) {
-              await updateOption.mutateAsync(update)
+              const optionResponse = await updateOption.mutateAsync(update)
+              if (!optionResponse.success) {
+                throw new Error(
+                  optionResponse.message || t('Failed to update setting')
+                )
+              }
             }
           }
 
@@ -596,6 +619,7 @@ export function ModelMutateDrawer({
       oldModelName,
       modelSettings,
       updateOption,
+      t,
     ]
   )
 
@@ -1271,7 +1295,11 @@ export function ModelMutateDrawer({
           >
             {t('Cancel')}
           </SheetClose>
-          <Button form='model-form' type='submit' disabled={isSubmitting}>
+          <Button
+            form='model-form'
+            type='submit'
+            disabled={isSubmitting || isSystemOptionsLoading}
+          >
             {isSubmitting && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
             {isEditing ? t('Update Model') : t('Save changes')}
           </Button>
