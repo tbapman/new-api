@@ -278,28 +278,19 @@ export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
                   <Section title='Windows' id='codex-windows'>
                     <div className='space-y-4'>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>1. 打开 WSL 终端</h3>
-                        <p className='text-sm text-muted-foreground'>先在终端里进入 WSL 环境，后面的命令都在这里执行。</p>
-                        <CodeBlock>{`wsl`}</CodeBlock>
+                        <h3 className='mb-2 text-sm font-semibold'>1. 安装 Node.js</h3>
+                        <p className='text-sm text-muted-foreground'>
+                          先去 Node.js 官网下载并安装 LTS 版本。
+                        </p>
+                        <CodeBlock>{`https://nodejs.org/zh-cn`}</CodeBlock>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>2. 安装 WSL2</h3>
-                        <p className='text-sm text-muted-foreground'>如果你的电脑还没有安装 WSL2，可以先执行这条命令完成安装。</p>
-                        <CodeBlock>{`wsl --install`}</CodeBlock>
-                      </div>
-                      <div>
-                        <h3 className='mb-2 text-sm font-semibold'>3. 安装 Node.js 22</h3>
-                        <p className='text-sm text-muted-foreground'>接着安装 Node.js 22，作为后续安装 Codex CLI 的运行环境。</p>
-                        <CodeBlock>{`curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
-nvm install 22`}</CodeBlock>
-                      </div>
-                      <div>
-                        <h3 className='mb-2 text-sm font-semibold'>4. 安装 Codex CLI</h3>
+                        <h3 className='mb-2 text-sm font-semibold'>2. 安装 Codex CLI</h3>
                         <p className='text-sm text-muted-foreground'>使用 npm 全局安装 Codex CLI。</p>
                         <CodeBlock>{`npm i -g @openai/codex`}</CodeBlock>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>5. 打开 PowerShell</h3>
+                        <h3 className='mb-2 text-sm font-semibold'>3. 打开 PowerShell</h3>
                         <p className='text-sm text-muted-foreground'>
                           按 <code className='mx-1 rounded bg-muted px-1 py-0.5'>Win</code> +{' '}
                           <code className='mx-1 rounded bg-muted px-1 py-0.5'>R</code>，输入
@@ -310,7 +301,7 @@ nvm install 22`}</CodeBlock>
                         </div>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>6. 创建 Codex 配置文件</h3>
+                        <h3 className='mb-2 text-sm font-semibold'>4. 创建 Codex 配置文件</h3>
                         <p className='text-sm text-muted-foreground'>先创建配置目录，再打开配置文件进行编辑。</p>
                         <CodeBlock>{`New-Item -ItemType Directory -Force "$env:USERPROFILE\\.codex"
 notepad "$env:USERPROFILE\\.codex\\config.toml"`}</CodeBlock>
@@ -330,14 +321,14 @@ wire_api = "responses"`}</CodeBlock>
                         <p className='mt-3 text-sm text-muted-foreground'>粘贴完成后，保存并关闭记事本。</p>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>7. 设置 API Key</h3>
+                        <h3 className='mb-2 text-sm font-semibold'>5. 设置 API Key</h3>
                         <p className='text-sm text-muted-foreground'>回到 PowerShell，把下面命令里的 key 换成你的真实 API Key 后执行。</p>
                         <div className='mt-3'>
                           <CodeBlock>{`setx OPENAI_API_KEY "sk-你的ModelBridge_API_KEY"`}</CodeBlock>
                         </div>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>8. 启动 Codex 测试</h3>
+                        <h3 className='mb-2 text-sm font-semibold'>6. 启动 Codex 测试</h3>
                         <p className='text-sm text-muted-foreground'>进入一个测试目录后，直接启动 Codex 验证配置是否生效。</p>
                         <div className='mt-3'>
                           <CodeBlock>{`cd /path/to/your/project
