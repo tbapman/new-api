@@ -109,13 +109,28 @@ export function Docs() {
                       <CodeBlock>{`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>2. 安装 Node.js</h3>
-                      <p className='text-sm text-muted-foreground'>用 Homebrew 安装 Node.js，作为 Claude Code 的运行环境。</p>
+                      <h3 className='mb-2 text-sm font-semibold'>2. 安装 nvm</h3>
+                      <p className='text-sm text-muted-foreground'>先安装 nvm，再用它来管理 Node.js 版本。</p>
                       <CodeBlock>{`brew update
-brew install node`}</CodeBlock>
+brew install nvm
+mkdir -p ~/.nvm
+cat >> ~/.zshrc <<'EOF'
+export NVM_DIR="$HOME/.nvm"
+[ -s "$(brew --prefix nvm)/nvm.sh" ] && \. "$(brew --prefix nvm)/nvm.sh"
+[ -s "$(brew --prefix nvm)/etc/bash_completion.d/nvm" ] && \. "$(brew --prefix nvm)/etc/bash_completion.d/nvm"
+EOF
+source ~/.zshrc`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>3. 清理旧环境</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>3. 通过 nvm 安装 Node.js</h3>
+                      <p className='text-sm text-muted-foreground'>使用 nvm 安装 Node.js LTS 版本。</p>
+                      <CodeBlock>{`nvm install --lts
+nvm use --lts
+node -v
+npm -v`}</CodeBlock>
+                    </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>4. 清理旧环境</h3>
                       <p className='text-sm text-muted-foreground'>先清理旧的 Claude Code 环境变量，避免和新配置冲突。</p>
                       <CodeBlock>{`unset ANTHROPIC_API_KEY
 unset ANTHROPIC_AUTH_TOKEN
@@ -123,12 +138,12 @@ unset ANTHROPIC_BASE_URL
 unset ANTHROPIC_MODEL`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>4. 安装 Claude Code CLI</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>5. 安装 Claude Code CLI</h3>
                       <p className='text-sm text-muted-foreground'>使用 npm 全局安装 Claude Code CLI。</p>
                       <CodeBlock>{`npm i @anthropic-ai/claude-code -g`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>5. 配置 ModelBridge</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>6. 配置 ModelBridge</h3>
                       <p className='text-sm text-muted-foreground'>
                         把下面内容追加到 <code className='mx-1 rounded bg-muted px-1 py-0.5'>~/.zshrc</code>，然后执行
                         <code className='mx-1 rounded bg-muted px-1 py-0.5'>source ~/.zshrc</code> 让配置生效。
@@ -145,7 +160,7 @@ EOF
 source ~/.zshrc`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>6. 启动 Claude Code 测试</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>7. 启动 Claude Code 测试</h3>
                       <p className='text-sm text-muted-foreground'>进入一个测试目录后，直接启动 Claude Code 验证配置是否生效。</p>
                       <CodeBlock>{`cd /path/to/your/project
 claude`}</CodeBlock>
@@ -161,13 +176,28 @@ claude`}</CodeBlock>
                         <CodeBlock>{`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`}</CodeBlock>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>2. 安装 Node.js</h3>
-                        <p className='text-sm text-muted-foreground'>用 Homebrew 安装 Node.js，作为 Codex CLI 的运行环境。</p>
+                        <h3 className='mb-2 text-sm font-semibold'>2. 安装 nvm</h3>
+                        <p className='text-sm text-muted-foreground'>先安装 nvm，再用它来管理 Node.js 版本。</p>
                         <CodeBlock>{`brew update
-brew install node`}</CodeBlock>
+brew install nvm
+mkdir -p ~/.nvm
+cat >> ~/.zshrc <<'EOF'
+export NVM_DIR="$HOME/.nvm"
+[ -s "$(brew --prefix nvm)/nvm.sh" ] && \. "$(brew --prefix nvm)/nvm.sh"
+[ -s "$(brew --prefix nvm)/etc/bash_completion.d/nvm" ] && \. "$(brew --prefix nvm)/etc/bash_completion.d/nvm"
+EOF
+source ~/.zshrc`}</CodeBlock>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>3. 安装 Codex CLI</h3>
+                        <h3 className='mb-2 text-sm font-semibold'>3. 通过 nvm 安装 Node.js</h3>
+                        <p className='text-sm text-muted-foreground'>使用 nvm 安装 Node.js LTS 版本。</p>
+                        <CodeBlock>{`nvm install --lts
+nvm use --lts
+node -v
+npm -v`}</CodeBlock>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>4. 安装 Codex CLI</h3>
                         <p className='text-sm text-muted-foreground'>接着用 npm 全局安装 Codex CLI，并检查版本是否可用。</p>
                         <CodeBlock>{`npm install -g @openai/codex`}</CodeBlock>
                         <div className='mt-3'>
@@ -175,7 +205,7 @@ brew install node`}</CodeBlock>
                         </div>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>4. 手动创建 `~/.codex/config.toml`</h3>
+                        <h3 className='mb-2 text-sm font-semibold'>5. 手动创建 `~/.codex/config.toml`</h3>
                         <p className='text-sm text-muted-foreground'>先创建配置目录，再写入 Codex 配置文件。</p>
                         <CodeBlock>{`mkdir -p ~/.codex
 chmod 700 ~/.codex
@@ -196,7 +226,7 @@ EOF
 chmod 600 ~/.codex/config.toml`}</CodeBlock>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>5. 设置 API Key</h3>
+                        <h3 className='mb-2 text-sm font-semibold'>6. 设置 API Key</h3>
                         <p className='text-sm text-muted-foreground'>
                           先把 API Key 配到当前终端里，最清晰，也最不容易把 key 写死到配置里。
                         </p>
@@ -213,7 +243,7 @@ source ~/.zshrc`}</CodeBlock>
                         </div>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>6. 启动 Codex 测试</h3>
+                        <h3 className='mb-2 text-sm font-semibold'>7. 启动 Codex 测试</h3>
                         <p className='text-sm text-muted-foreground'>进入一个测试目录后，直接启动 Codex 验证配置是否生效。</p>
                         <div className='mt-3'>
                           <CodeBlock>{`cd /path/to/your/project
@@ -401,13 +431,21 @@ codex`}</CodeBlock>
                       <CodeBlock>{`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>2. 安装 Node.js</h3>
-                      <p className='text-sm text-muted-foreground'>用 Homebrew 安装 Node.js，作为 Claude Code 的运行环境。</p>
-                      <CodeBlock>{`brew update
-brew install node`}</CodeBlock>
+                      <h3 className='mb-2 text-sm font-semibold'>2. 安装 nvm</h3>
+                      <p className='text-sm text-muted-foreground'>先安装 nvm，再用它来管理 Node.js 版本。</p>
+                      <CodeBlock>{`curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+source ~/.bashrc`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>3. 清理旧环境</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>3. 通过 nvm 安装 Node.js</h3>
+                      <p className='text-sm text-muted-foreground'>使用 nvm 安装 Node.js LTS 版本。</p>
+                      <CodeBlock>{`nvm install --lts
+nvm use --lts
+node -v
+npm -v`}</CodeBlock>
+                    </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>4. 清理旧环境</h3>
                       <p className='text-sm text-muted-foreground'>先清理旧的 Claude Code 环境变量，避免和新配置冲突。</p>
                       <CodeBlock>{`unset ANTHROPIC_API_KEY
 unset ANTHROPIC_AUTH_TOKEN
@@ -415,12 +453,12 @@ unset ANTHROPIC_BASE_URL
 unset ANTHROPIC_MODEL`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>4. 安装 Claude Code CLI</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>5. 安装 Claude Code CLI</h3>
                       <p className='text-sm text-muted-foreground'>使用 npm 全局安装 Claude Code CLI。</p>
                       <CodeBlock>{`npm i @anthropic-ai/claude-code -g`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>5. 配置 ModelBridge</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>6. 配置 ModelBridge</h3>
                       <p className='text-sm text-muted-foreground'>
                         把下面内容追加到 <code className='mx-1 rounded bg-muted px-1 py-0.5'>~/.zshrc</code>，然后执行
                         <code className='mx-1 rounded bg-muted px-1 py-0.5'>source ~/.zshrc</code> 让配置生效。
@@ -437,7 +475,7 @@ EOF
 source ~/.zshrc`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>6. 启动 Claude Code 测试</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>7. 启动 Claude Code 测试</h3>
                       <p className='text-sm text-muted-foreground'>进入一个测试目录后，直接启动 Claude Code 验证配置是否生效。</p>
                       <CodeBlock>{`cd /path/to/your/project
 claude`}</CodeBlock>
@@ -448,21 +486,29 @@ claude`}</CodeBlock>
                   <Section title='Linux' id='codex-linux'>
                     <div className='space-y-4'>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>1. 安装 Node.js</h3>
-                        <p className='text-sm text-muted-foreground'>先安装 Node.js，作为 Codex CLI 的运行环境。</p>
-                        <CodeBlock>{`sudo curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-sudo apt-get install -y nodejs`}</CodeBlock>
+                        <h3 className='mb-2 text-sm font-semibold'>1. 安装 nvm</h3>
+                        <p className='text-sm text-muted-foreground'>先安装 nvm，再用它来管理 Node.js 版本。</p>
+                        <CodeBlock>{`sudo apt update
+sudo apt install -y curl
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash`}</CodeBlock>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>2. 安装 Codex CLI</h3>
-                        <p className='text-sm text-muted-foreground'>使用 npm 全局安装 Codex CLI。</p>
-                        <CodeBlock>{`npm i -g @openai/codex`}</CodeBlock>
-                        <div className='mt-3'>
-                          <CodeBlock>{`codex --version`}</CodeBlock>
-                        </div>
+                        <h3 className='mb-2 text-sm font-semibold'>2. 通过 nvm 安装 Node.js</h3>
+                        <p className='text-sm text-muted-foreground'>重新加载 shell 后，使用 nvm 安装 Node.js LTS 版本。</p>
+                        <CodeBlock>{`source ~/.bashrc
+nvm install --lts
+nvm use --lts
+node -v
+npm -v`}</CodeBlock>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>3. 手动创建 `~/.codex/config.toml`</h3>
+                        <h3 className='mb-2 text-sm font-semibold'>3. 安装 Codex CLI</h3>
+                        <p className='text-sm text-muted-foreground'>使用 npm 全局安装 Codex CLI，并检查版本是否可用。</p>
+                        <CodeBlock>{`npm i -g @openai/codex
+codex --version`}</CodeBlock>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>4. 手动创建 `~/.codex/config.toml`</h3>
                         <p className='text-sm text-muted-foreground'>先创建配置目录，再写入 Codex 配置文件。</p>
                         <CodeBlock>{`mkdir -p ~/.codex
 chmod 700 ~/.codex
@@ -483,7 +529,7 @@ EOF
 chmod 600 ~/.codex/config.toml`}</CodeBlock>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>4. 设置 API Key</h3>
+                        <h3 className='mb-2 text-sm font-semibold'>5. 设置 API Key</h3>
                         <p className='text-sm text-muted-foreground'>
                           在当前终端里先设置环境变量，最清晰，也最不容易把 key 写死到配置里。
                         </p>
@@ -500,7 +546,7 @@ source ~/.zshrc`}</CodeBlock>
                         </div>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>5. 启动 Codex 测试</h3>
+                        <h3 className='mb-2 text-sm font-semibold'>6. 启动 Codex 测试</h3>
                         <p className='text-sm text-muted-foreground'>进入一个测试目录后，直接启动 Codex 验证配置是否生效。</p>
                         <div className='mt-3'>
                           <CodeBlock>{`cd /path/to/your/project
