@@ -297,7 +297,6 @@ codex`}</CodeBlock>
                         </div>
                       </div>
                     </div>
-                  </div>
                   </Section>
                 )}
               </TabsContent>
