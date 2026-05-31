@@ -223,7 +223,7 @@ export function BillingHistoryDialog({
                           </div>
                           <div className='space-y-1'>
                             <Label className='text-muted-foreground text-xs'>
-                              Amount
+                              {record.fee_rate && record.fee_rate > 0 ? 'Charged' : 'Amount'}
                             </Label>
                             <div className='text-sm font-semibold'>
                               {formatCurrencyFromUSD(record.amount, {
@@ -232,15 +232,41 @@ export function BillingHistoryDialog({
                                 abbreviate: false,
                               })}
                             </div>
+                            {record.fee_rate != null && record.fee_rate > 0 && (
+                              <div className='flex items-center gap-1'>
+                                <span className='text-muted-foreground text-xs'>
+                                  手续费 {(record.fee_rate * 100).toFixed(1)}%
+                                </span>
+                                {record.fee_amount != null && record.fee_amount > 0 && (
+                                  <span className='text-xs text-red-500'>
+                                    −${record.fee_amount.toFixed(2)}
+                                  </span>
+                                )}
+                              </div>
+                            )}
                           </div>
-                          <div className='space-y-1'>
-                            <Label className='text-muted-foreground text-xs'>
-                              Payment
-                            </Label>
-                            <div className='text-sm font-semibold text-red-600'>
-                              {formatNumber(record.money)}
+                          {record.fee_rate != null && record.fee_rate > 0 ? (
+                            <div className='space-y-1'>
+                              <Label className='text-muted-foreground text-xs'>
+                                Credited
+                              </Label>
+                              <div className='text-sm font-semibold text-green-700 dark:text-green-400'>
+                                ${((record.amount - (record.fee_amount ?? 0)) as number).toFixed(4)}
+                              </div>
+                              <div className='text-muted-foreground text-xs'>
+                                支付 {formatNumber(record.money)}
+                              </div>
                             </div>
-                          </div>
+                          ) : (
+                            <div className='space-y-1'>
+                              <Label className='text-muted-foreground text-xs'>
+                                Payment
+                              </Label>
+                              <div className='text-sm font-semibold text-red-600'>
+                                {formatNumber(record.money)}
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         {/* Admin Actions */}
