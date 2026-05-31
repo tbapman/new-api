@@ -183,12 +183,15 @@ chmod 600 ~/.codex/config.toml`}</CodeBlock>
                       <div>
                         <h3 className='mb-2 text-sm font-semibold'>5. 配置 API Key</h3>
                         <p className='text-sm text-muted-foreground'>
-                          推荐先用环境变量方式，最清晰，也最不容易把 key 写死到配置里。为了每次打开终端都生效，写入
-                          <code className='mx-1 rounded bg-muted px-1 py-0.5'>~/.zshrc</code>。
+                          推荐先用环境变量方式，最清晰，也最不容易把 key 写死到配置里。
                         </p>
                         <div className='mt-3'>
                           <CodeBlock>{`export OPENAI_API_KEY="sk-你的ModelBridge_API_KEY"`}</CodeBlock>
                         </div>
+                        <p className='mt-3 text-sm text-muted-foreground'>
+                          如果希望每次打开终端都生效，可以把这行写入
+                          <code className='mx-1 rounded bg-muted px-1 py-0.5'>~/.zshrc</code>，但这一步不是必须的。
+                        </p>
                         <div className='mt-3'>
                           <CodeBlock>{`echo 'export OPENAI_API_KEY="sk-你的ModelBridge_API_KEY"' >> ~/.zshrc
 source ~/.zshrc`}</CodeBlock>
@@ -279,12 +282,15 @@ nvm install 22`}</CodeBlock>
                       <div>
                         <h3 className='mb-2 text-sm font-semibold'>5. 配置 API Key</h3>
                         <p className='text-sm text-muted-foreground'>
-                          推荐先用环境变量方式，最清晰，也最不容易把 key 写死到配置里。为了每次打开终端都生效，写入
-                          <code className='mx-1 rounded bg-muted px-1 py-0.5'>~/.zshrc</code>。
+                          推荐先用环境变量方式，最清晰，也最不容易把 key 写死到配置里。
                         </p>
                         <div className='mt-3'>
                           <CodeBlock>{`export OPENAI_API_KEY="sk-你的ModelBridge_API_KEY"`}</CodeBlock>
                         </div>
+                        <p className='mt-3 text-sm text-muted-foreground'>
+                          如果希望每次打开终端都生效，可以把这行写入
+                          <code className='mx-1 rounded bg-muted px-1 py-0.5'>~/.zshrc</code>，但这一步不是必须的。
+                        </p>
                         <div className='mt-3'>
                           <CodeBlock>{`echo 'export OPENAI_API_KEY="sk-你的ModelBridge_API_KEY"' >> ~/.zshrc
 source ~/.zshrc`}</CodeBlock>
@@ -376,12 +382,15 @@ chmod 600 ~/.codex/config.toml`}</CodeBlock>
                       <div>
                         <h3 className='mb-2 text-sm font-semibold'>4. 配置 API Key</h3>
                         <p className='text-sm text-muted-foreground'>
-                          推荐先用环境变量方式，最清晰，也最不容易把 key 写死到配置里。为了每次打开终端都生效，写入
-                          <code className='mx-1 rounded bg-muted px-1 py-0.5'>~/.zshrc</code>。
+                          推荐先用环境变量方式，最清晰，也最不容易把 key 写死到配置里。
                         </p>
                         <div className='mt-3'>
                           <CodeBlock>{`export OPENAI_API_KEY="sk-你的ModelBridge_API_KEY"`}</CodeBlock>
                         </div>
+                        <p className='mt-3 text-sm text-muted-foreground'>
+                          如果希望每次打开终端都生效，可以把这行写入
+                          <code className='mx-1 rounded bg-muted px-1 py-0.5'>~/.zshrc</code>，但这一步不是必须的。
+                        </p>
                         <div className='mt-3'>
                           <CodeBlock>{`echo 'export OPENAI_API_KEY="sk-你的ModelBridge_API_KEY"' >> ~/.zshrc
 source ~/.zshrc`}</CodeBlock>
