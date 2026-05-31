@@ -227,91 +227,146 @@ codex`}</CodeBlock>
 
               <TabsContent value='windows' className='space-y-6'>
                 {activeApp === 'claude' ? (
-                  <Section title='Windows' id='windows'>
-                  <div className='space-y-4'>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>1. 安装 Node.js 环境</h3>
-                      <p className='text-sm text-muted-foreground'>先安装 Node.js，确保后面可以运行 Claude Code。</p>
-                      <StepList
-                        items={[
-                          '打开 Node.js 官方站点并下载 LTS 版本。',
-                          '运行 `.msi` 安装包。',
-                          '按默认选项完成安装。',
-                        ]}
-                      />
-                      <div className='mt-4'>
-                        <CodeBlock>{`node --version
-npm --version`}</CodeBlock>
-                      </div>
-                    </div>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>2. 安装 Git Bash</h3>
-                      <p className='text-sm text-muted-foreground'>如果系统里还没有 Git Bash，先安装它。</p>
-                    </div>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>3. 安装 Claude Code</h3>
-                      <p className='text-sm text-muted-foreground'>在终端里全局安装 Claude Code。</p>
-                      <CodeBlock>{`npm install -g @anthropic-ai/claude-code`}</CodeBlock>
-                      <div className='mt-3'>
-                        <CodeBlock>{`claude --version`}</CodeBlock>
-                      </div>
-                    </div>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>4. 获取 API 密钥</h3>
-                      <p className='text-sm text-muted-foreground'>打开密钥页面，复制可用的 API Key。</p>
-                      <CodeBlock>{`https://www.modelbridge.cloud/keys`}</CodeBlock>
-                    </div>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>5. 环境变量</h3>
-                      <p className='text-sm text-muted-foreground'>把基础地址和认证 token 配到环境变量里。</p>
-                      <CodeBlock>{`export ANTHROPIC_BASE_URL='https://www.modelbridge.cloud'
-export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
-                    </div>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>6. 启动 Claude Code</h3>
-                      <p className='text-sm text-muted-foreground'>进入项目目录后启动 Claude Code，然后开始使用。</p>
-                      <CodeBlock>{`claude`}</CodeBlock>
-                      <div className='mt-3'>
-                        <CodeBlock>{`cd C:\\path\\to\\your\\project`}</CodeBlock>
-                      </div>
-                      <div className='mt-3'>
-                        <CodeBlock>{`/model`}</CodeBlock>
-                      </div>
-                    </div>
-                  </div>
-                  </Section>
-                ) : (
-                  <Section title='Windows' id='codex-windows'>
+                  <Section title='WSL Ubuntu 安装 Claude Code' id='windows'>
                     <div className='space-y-4'>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>1. 安装 Node.js</h3>
-                        <p className='text-sm text-muted-foreground'>
-                          先去 Node.js 官网下载并安装 LTS 版本。
-                        </p>
-                        <CodeBlock>{`https://nodejs.org/zh-cn`}</CodeBlock>
+                        <h3 className='mb-2 text-sm font-semibold'>1. 安装 WSL</h3>
+                        <p className='text-sm text-muted-foreground'>用管理员身份打开 PowerShell，执行下面命令安装 WSL。</p>
+                        <CodeBlock>{`wsl --install`}</CodeBlock>
+                        <p className='mt-3 text-sm text-muted-foreground'>安装完成后重启电脑，然后打开 Ubuntu，设置 Linux 用户名和密码。</p>
+                        <p className='mt-3 text-sm text-muted-foreground'>检查 WSL 是否正常：</p>
+                        <CodeBlock>{`uname -a`}</CodeBlock>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>2. 安装 Codex CLI</h3>
-                        <p className='text-sm text-muted-foreground'>使用 npm 全局安装 Codex CLI。</p>
+                        <h3 className='mb-2 text-sm font-semibold'>2. 在 WSL 里安装 Node.js</h3>
+                        <p className='text-sm text-muted-foreground'>进入 Ubuntu 后，先更新系统软件包并安装 curl。</p>
+                        <CodeBlock>{`sudo apt update
+sudo apt install -y curl`}</CodeBlock>
+                        <p className='mt-3 text-sm text-muted-foreground'>推荐使用 nvm 安装 Node.js：</p>
+                        <CodeBlock>{`curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash`}</CodeBlock>
+                        <p className='mt-3 text-sm text-muted-foreground'>重新加载 shell：</p>
+                        <CodeBlock>{`source ~/.bashrc`}</CodeBlock>
+                        <p className='mt-3 text-sm text-muted-foreground'>安装 Node LTS：</p>
+                        <CodeBlock>{`nvm install --lts
+nvm use --lts`}</CodeBlock>
+                        <p className='mt-3 text-sm text-muted-foreground'>检查 Node.js 和 npm：</p>
+                        <CodeBlock>{`node -v
+npm -v`}</CodeBlock>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>3. 在 WSL 里安装 Claude Code</h3>
+                        <p className='text-sm text-muted-foreground'>使用 npm 全局安装 Claude Code。</p>
+                        <CodeBlock>{`npm install -g @anthropic-ai/claude-code`}</CodeBlock>
+                        <p className='mt-3 text-sm text-muted-foreground'>检查安装结果：</p>
+                        <CodeBlock>{`claude --version
+which claude`}</CodeBlock>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>4. 在 WSL 里配置 ModelBridge</h3>
+                        <CodeBlock>{`cat >> ~/.bashrc <<'EOF'
+
+# Claude Code via ModelBridge
+export ANTHROPIC_BASE_URL="https://www.modelbridge.cloud"
+export ANTHROPIC_AUTH_TOKEN="sk-你的ModelBridge_API_KEY"
+export ANTHROPIC_API_KEY=""
+EOF
+
+source ~/.bashrc`}</CodeBlock>
+                        <p className='mt-3 text-sm text-muted-foreground'>检查环境变量是否生效，不要完整打印 key：</p>
+                        <CodeBlock>{`echo "$ANTHROPIC_BASE_URL"
+echo "\${ANTHROPIC_AUTH_TOKEN:0:8}"
+echo "$ANTHROPIC_API_KEY"`}</CodeBlock>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>5. 启动 Claude Code 测试</h3>
+                        <p className='text-sm text-muted-foreground'>进入一个测试目录后，直接启动 Claude 验证配置是否生效。</p>
+                        <CodeBlock>{`cd /path/to/your/project
+claude`}</CodeBlock>
+                      </div>
+                    </div>
+                  </Section>
+                ) : (
+                  <Section title='Windows + WSL 安装并配置 Codex CLI' id='codex-windows'>
+                    <div className='space-y-4'>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>1. 安装 WSL</h3>
+                        <p className='text-sm text-muted-foreground'>先用管理员身份打开 PowerShell。</p>
+                        <p className='text-sm text-muted-foreground'>按 <code className='mx-1 rounded bg-muted px-1 py-0.5'>Win</code> 键，搜索：</p>
+                        <CodeBlock>{`PowerShell`}</CodeBlock>
+                        <p className='text-sm text-muted-foreground'>右键选择：</p>
+                        <CodeBlock>{`以管理员身份运行`}</CodeBlock>
+                        <p className='text-sm text-muted-foreground'>然后执行：</p>
+                        <CodeBlock>{`wsl --install`}</CodeBlock>
+                        <p className='text-sm text-muted-foreground'>安装完成后，重启电脑。</p>
+                        <p className='text-sm text-muted-foreground'>重启后，系统会自动打开 Ubuntu 初始化窗口。按照提示设置 Linux 用户名和密码。</p>
+                        <p className='text-sm text-muted-foreground'>如果没有自动打开，可以按 <code className='mx-1 rounded bg-muted px-1 py-0.5'>Win</code> 键搜索：</p>
+                        <CodeBlock>{`Ubuntu`}</CodeBlock>
+                        <p className='text-sm text-muted-foreground'>然后打开。</p>
+                        <p className='text-sm text-muted-foreground'>进入 Ubuntu 后，执行下面命令确认 WSL 正常：</p>
+                        <CodeBlock>{`uname -a`}</CodeBlock>
+                        <p className='text-sm text-muted-foreground'>如果能看到 Linux 相关信息，说明 WSL 已经安装成功。</p>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>2. 在 WSL 里安装 Node.js</h3>
+                        <p className='text-sm text-muted-foreground'>进入 Ubuntu 终端后，先更新系统软件包：</p>
+                        <CodeBlock>{`sudo apt update
+sudo apt install -y curl`}</CodeBlock>
+                        <p className='text-sm text-muted-foreground'>推荐使用 nvm 安装 Node.js：</p>
+                        <CodeBlock>{`curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash`}</CodeBlock>
+                        <p className='text-sm text-muted-foreground'>安装完成后，重新加载 shell 配置：</p>
+                        <CodeBlock>{`source ~/.bashrc`}</CodeBlock>
+                        <p className='text-sm text-muted-foreground'>安装 Node.js LTS 版本：</p>
+                        <CodeBlock>{`nvm install --lts
+nvm use --lts`}</CodeBlock>
+                        <p className='text-sm text-muted-foreground'>检查 Node.js 和 npm 是否安装成功：</p>
+                        <CodeBlock>{`node -v
+npm -v`}</CodeBlock>
+                        <p className='text-sm text-muted-foreground'>只要能正常输出版本号，就说明 Node.js 安装成功。</p>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>3. 在 WSL 里安装 Codex CLI</h3>
+                        <p className='text-sm text-muted-foreground'>使用 npm 全局安装 Codex CLI：</p>
                         <CodeBlock>{`npm i -g @openai/codex`}</CodeBlock>
+                        <p className='text-sm text-muted-foreground'>检查 Codex CLI 是否安装成功：</p>
+                        <CodeBlock>{`codex --version
+which codex`}</CodeBlock>
+                        <p className='text-sm text-muted-foreground'>如果能看到 Codex 版本号，并且路径类似：</p>
+                        <CodeBlock>{`/home/你的用户名/.nvm/versions/node/xxx/bin/codex`}</CodeBlock>
+                        <p className='text-sm text-muted-foreground'>说明 Codex CLI 已经安装成功。</p>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>3. 打开 PowerShell</h3>
-                        <p className='text-sm text-muted-foreground'>
-                          按 <code className='mx-1 rounded bg-muted px-1 py-0.5'>Win</code> +{' '}
-                          <code className='mx-1 rounded bg-muted px-1 py-0.5'>R</code>，输入
-                          <code className='mx-1 rounded bg-muted px-1 py-0.5'>powershell</code>，然后回车打开。
-                        </p>
+                        <h3 className='mb-2 text-sm font-semibold'>4. 在 WSL 里配置 ModelBridge</h3>
+                        <p className='text-sm text-muted-foreground'>先创建 Codex 配置目录：</p>
+                        <CodeBlock>{`mkdir -p ~/.codex
+chmod 700 ~/.codex`}</CodeBlock>
+                        <p className='mt-3 text-sm text-muted-foreground'>然后创建并写入配置文件：</p>
                         <div className='mt-3'>
-                          <CodeBlock>{`powershell`}</CodeBlock>
+                          <CodeBlock>{`cat > ~/.codex/config.toml <<'EOF'
+model = "gpt-5.4-mini"
+model_provider = "modelbridge"
+model_reasoning_effort = "medium"
+disable_response_storage = true
+
+[model_providers.modelbridge]
+name = "ModelBridge"
+base_url = "https://www.modelbridge.cloud/v1"
+env_key = "OPENAI_API_KEY"
+wire_api = "responses"
+EOF
+
+chmod 600 ~/.codex/config.toml`}</CodeBlock>
                         </div>
-                      </div>
-                      <div>
-                        <h3 className='mb-2 text-sm font-semibold'>4. 创建 Codex 配置文件</h3>
-                        <p className='text-sm text-muted-foreground'>先创建配置目录，再打开配置文件进行编辑。</p>
-                        <CodeBlock>{`New-Item -ItemType Directory -Force "$env:USERPROFILE\\.codex"
-notepad "$env:USERPROFILE\\.codex\\config.toml"`}</CodeBlock>
-                        <p className='mt-3 text-sm text-muted-foreground'>然后把下面这段内容粘贴进去：</p>
+                        <p className='mt-3 text-sm text-muted-foreground'>接着配置 ModelBridge API Key。</p>
+                        <p className='text-sm text-muted-foreground'>把下面命令里的 <code className='mx-1 rounded bg-muted px-1 py-0.5'>sk-你的ModelBridge_API_KEY</code> 替换成你的真实 API Key：</p>
+                        <div className='mt-3'>
+                          <CodeBlock>{`echo 'export OPENAI_API_KEY="sk-你的ModelBridge_API_KEY"' >> ~/.bashrc
+source ~/.bashrc`}</CodeBlock>
+                        </div>
+                        <p className='mt-3 text-sm text-muted-foreground'>验证 API Key 是否生效，不要完整打印 key：</p>
+                        <CodeBlock>{`echo \${OPENAI_API_KEY:0:8}`}</CodeBlock>
+                        <p className='mt-3 text-sm text-muted-foreground'>检查 Codex 配置文件：</p>
+                        <CodeBlock>{`cat ~/.codex/config.toml`}</CodeBlock>
+                        <p className='mt-3 text-sm text-muted-foreground'>最终配置文件应该类似这样：</p>
                         <div className='mt-3'>
                           <CodeBlock>{`model = "gpt-5.4-mini"
 model_provider = "modelbridge"
@@ -324,22 +379,12 @@ base_url = "https://www.modelbridge.cloud/v1"
 env_key = "OPENAI_API_KEY"
 wire_api = "responses"`}</CodeBlock>
                         </div>
-                        <p className='mt-3 text-sm text-muted-foreground'>粘贴完成后，保存并关闭记事本。</p>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>5. 设置 API Key</h3>
-                        <p className='text-sm text-muted-foreground'>回到 PowerShell，把下面命令里的 key 换成你的真实 API Key 后执行。</p>
-                        <div className='mt-3'>
-                          <CodeBlock>{`setx OPENAI_API_KEY "sk-你的ModelBridge_API_KEY"`}</CodeBlock>
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className='mb-2 text-sm font-semibold'>6. 启动 Codex 测试</h3>
+                        <h3 className='mb-2 text-sm font-semibold'>5. 启动 Codex 测试</h3>
                         <p className='text-sm text-muted-foreground'>进入一个测试目录后，直接启动 Codex 验证配置是否生效。</p>
-                        <div className='mt-3'>
-                          <CodeBlock>{`cd /path/to/your/project
+                        <CodeBlock>{`cd /path/to/your/project
 codex`}</CodeBlock>
-                        </div>
                       </div>
                     </div>
                   </Section>
