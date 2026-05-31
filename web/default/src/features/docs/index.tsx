@@ -104,12 +104,18 @@ export function Docs() {
                   <Section title='macOS' id='mac'>
                   <div className='space-y-4'>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>1. 安装 Node.js</h3>
-                      <p className='text-sm text-muted-foreground'>访问 Node.js 官网，下载并安装 LTS 版本。</p>
-                      <CodeBlock>{`https://nodejs.org/zh-cn`}</CodeBlock>
+                      <h3 className='mb-2 text-sm font-semibold'>1. 安装 Homebrew</h3>
+                      <p className='text-sm text-muted-foreground'>如果还没有 Homebrew，先安装它，后面会用它装 Node.js。</p>
+                      <CodeBlock>{`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>2. 清理旧环境</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>2. 安装 Node.js</h3>
+                      <p className='text-sm text-muted-foreground'>用 Homebrew 安装 Node.js，作为 Claude Code 的运行环境。</p>
+                      <CodeBlock>{`brew update
+brew install node`}</CodeBlock>
+                    </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>3. 清理旧环境</h3>
                       <p className='text-sm text-muted-foreground'>先清理旧的 Claude Code 环境变量，避免和新配置冲突。</p>
                       <CodeBlock>{`unset ANTHROPIC_API_KEY
 unset ANTHROPIC_AUTH_TOKEN
@@ -117,12 +123,12 @@ unset ANTHROPIC_BASE_URL
 unset ANTHROPIC_MODEL`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>3. 安装 Claude Code CLI</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>4. 安装 Claude Code CLI</h3>
                       <p className='text-sm text-muted-foreground'>使用 npm 全局安装 Claude Code CLI。</p>
                       <CodeBlock>{`npm i @anthropic-ai/claude-code -g`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>4. 配置 ModelBridge</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>5. 配置 ModelBridge</h3>
                       <p className='text-sm text-muted-foreground'>
                         把下面内容追加到 <code className='mx-1 rounded bg-muted px-1 py-0.5'>~/.zshrc</code>，然后执行
                         <code className='mx-1 rounded bg-muted px-1 py-0.5'>source ~/.zshrc</code> 让配置生效。
@@ -139,7 +145,7 @@ EOF
 source ~/.zshrc`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>5. 启动 Claude Code 测试</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>6. 启动 Claude Code 测试</h3>
                       <p className='text-sm text-muted-foreground'>进入一个测试目录后，直接启动 Claude Code 验证配置是否生效。</p>
                       <CodeBlock>{`cd /path/to/your/project
 claude`}</CodeBlock>
@@ -345,12 +351,18 @@ codex`}</CodeBlock>
                   <Section title='Linux' id='linux'>
                   <div className='space-y-4'>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>1. 安装 Node.js</h3>
-                      <p className='text-sm text-muted-foreground'>访问 Node.js 官网，下载并安装 LTS 版本。</p>
-                      <CodeBlock>{`https://nodejs.org/zh-cn`}</CodeBlock>
+                      <h3 className='mb-2 text-sm font-semibold'>1. 安装 Homebrew</h3>
+                      <p className='text-sm text-muted-foreground'>如果还没有 Homebrew，先安装它，后面会用它装 Node.js。</p>
+                      <CodeBlock>{`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>2. 清理旧环境</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>2. 安装 Node.js</h3>
+                      <p className='text-sm text-muted-foreground'>用 Homebrew 安装 Node.js，作为 Claude Code 的运行环境。</p>
+                      <CodeBlock>{`brew update
+brew install node`}</CodeBlock>
+                    </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>3. 清理旧环境</h3>
                       <p className='text-sm text-muted-foreground'>先清理旧的 Claude Code 环境变量，避免和新配置冲突。</p>
                       <CodeBlock>{`unset ANTHROPIC_API_KEY
 unset ANTHROPIC_AUTH_TOKEN
@@ -358,12 +370,12 @@ unset ANTHROPIC_BASE_URL
 unset ANTHROPIC_MODEL`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>3. 安装 Claude Code CLI</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>4. 安装 Claude Code CLI</h3>
                       <p className='text-sm text-muted-foreground'>使用 npm 全局安装 Claude Code CLI。</p>
                       <CodeBlock>{`npm i @anthropic-ai/claude-code -g`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>4. 配置 ModelBridge</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>5. 配置 ModelBridge</h3>
                       <p className='text-sm text-muted-foreground'>
                         把下面内容追加到 <code className='mx-1 rounded bg-muted px-1 py-0.5'>~/.zshrc</code>，然后执行
                         <code className='mx-1 rounded bg-muted px-1 py-0.5'>source ~/.zshrc</code> 让配置生效。
@@ -380,7 +392,7 @@ EOF
 source ~/.zshrc`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>5. 启动 Claude Code 测试</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>6. 启动 Claude Code 测试</h3>
                       <p className='text-sm text-muted-foreground'>进入一个测试目录后，直接启动 Claude Code 验证配置是否生效。</p>
                       <CodeBlock>{`cd /path/to/your/project
 claude`}</CodeBlock>
