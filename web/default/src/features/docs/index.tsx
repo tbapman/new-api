@@ -104,45 +104,45 @@ export function Docs() {
                   <Section title='macOS' id='mac'>
                   <div className='space-y-4'>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>1. 安装 Claude Code CLI</h3>
-                      <p className='text-sm text-muted-foreground'>先在 macOS 上安装 Claude Code CLI。</p>
-                      <CodeBlock>{`curl -fsSL https://claude.ai/install.sh | bash`}</CodeBlock>
+                      <h3 className='mb-2 text-sm font-semibold'>1. 安装 Node.js</h3>
+                      <p className='text-sm text-muted-foreground'>访问 Node.js 官网，下载并安装 LTS 版本。</p>
+                      <CodeBlock>{`https://nodejs.org/zh-cn`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>2. 获取 API 密钥</h3>
-                      <p className='text-sm text-muted-foreground'>打开密钥页面，复制可用的 API Key。</p>
-                      <CodeBlock>{`https://www.modelbridge.cloud/keys`}</CodeBlock>
+                      <h3 className='mb-2 text-sm font-semibold'>2. 清理旧环境</h3>
+                      <p className='text-sm text-muted-foreground'>先清理旧的 Claude Code 环境变量，避免和新配置冲突。</p>
+                      <CodeBlock>{`unset ANTHROPIC_API_KEY
+unset ANTHROPIC_AUTH_TOKEN
+unset ANTHROPIC_BASE_URL
+unset ANTHROPIC_MODEL`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>3. 环境变量</h3>
-                      <p className='text-sm text-muted-foreground'>把服务地址和认证 token 配到环境变量里。</p>
-                      <CodeBlock>{`export ANTHROPIC_BASE_URL='https://www.modelbridge.cloud'
-export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
+                      <h3 className='mb-2 text-sm font-semibold'>3. 安装 Claude Code CLI</h3>
+                      <p className='text-sm text-muted-foreground'>使用 npm 全局安装 Claude Code CLI。</p>
+                      <CodeBlock>{`npm i @anthropic-ai/claude-code -g`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>4. 启动 Claude Code</h3>
-                      <p className='text-sm text-muted-foreground'>进入项目目录后启动 Claude Code，再选择要使用的模型。</p>
-                      <CodeBlock>{`claude`}</CodeBlock>
-                      <div className='mt-3'>
-                        <CodeBlock>{`cd /path/to/your/project`}</CodeBlock>
-                      </div>
-                      <div className='mt-3'>
-                        <CodeBlock>{`/model`}</CodeBlock>
-                      </div>
+                      <h3 className='mb-2 text-sm font-semibold'>4. 配置 ModelBridge</h3>
+                      <p className='text-sm text-muted-foreground'>
+                        把下面内容追加到 <code className='mx-1 rounded bg-muted px-1 py-0.5'>~/.zshrc</code>，然后执行
+                        <code className='mx-1 rounded bg-muted px-1 py-0.5'>source ~/.zshrc</code> 让配置生效。
+                      </p>
+                      <CodeBlock>{`cat >> ~/.zshrc <<'EOF'
+
+# Claude Code via ModelBridge
+# ANTHROPIC_AUTH_TOKEN到https://www.modelbridge.cloud/keys创建获取
+export ANTHROPIC_BASE_URL="https://www.modelbridge.cloud"
+export ANTHROPIC_AUTH_TOKEN="sk-你的ModelBridge_API_KEY"
+export ANTHROPIC_API_KEY=""
+EOF
+
+source ~/.zshrc`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>5. macOS 常见问题处理</h3>
-                      <p className='text-sm text-muted-foreground'>如果 macOS 提示安全拦截，可以按下面步骤放行。</p>
-                      <StepList
-                        items={[
-                          '打开“系统偏好设置”。',
-                          '进入“安全性与隐私”。',
-                          '选择“仍要打开”或“允许”。',
-                        ]}
-                      />
-                      <div className='mt-4'>
-                        <CodeBlock>{`sudo spctl --master-disable`}</CodeBlock>
-                      </div>
+                      <h3 className='mb-2 text-sm font-semibold'>5. 启动 Claude Code 测试</h3>
+                      <p className='text-sm text-muted-foreground'>进入一个测试目录后，直接启动 Claude Code 验证配置是否生效。</p>
+                      <CodeBlock>{`cd /path/to/your/project
+claude`}</CodeBlock>
                     </div>
                   </div>
                   </Section>
@@ -345,37 +345,45 @@ codex`}</CodeBlock>
                   <Section title='Linux' id='linux'>
                   <div className='space-y-4'>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>1. 安装 Claude Code</h3>
-                      <p className='text-sm text-muted-foreground'>先在 Linux 上安装 Claude Code。</p>
-                      <CodeBlock>{`curl -fsSL https://claude.ai/install.sh | bash`}</CodeBlock>
-                      <div className='mt-3'>
-                        <CodeBlock>{`sudo curl -fsSL https://claude.ai/install.sh | bash`}</CodeBlock>
-                      </div>
-                      <div className='mt-3'>
-                        <CodeBlock>{`claude --version`}</CodeBlock>
-                      </div>
+                      <h3 className='mb-2 text-sm font-semibold'>1. 安装 Node.js</h3>
+                      <p className='text-sm text-muted-foreground'>访问 Node.js 官网，下载并安装 LTS 版本。</p>
+                      <CodeBlock>{`https://nodejs.org/zh-cn`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>2. 获取 API 密钥</h3>
-                      <p className='text-sm text-muted-foreground'>打开密钥页面，复制可用的 API Key。</p>
-                      <CodeBlock>{`https://www.modelbridge.cloud/keys`}</CodeBlock>
+                      <h3 className='mb-2 text-sm font-semibold'>2. 清理旧环境</h3>
+                      <p className='text-sm text-muted-foreground'>先清理旧的 Claude Code 环境变量，避免和新配置冲突。</p>
+                      <CodeBlock>{`unset ANTHROPIC_API_KEY
+unset ANTHROPIC_AUTH_TOKEN
+unset ANTHROPIC_BASE_URL
+unset ANTHROPIC_MODEL`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>3. 环境变量</h3>
-                      <p className='text-sm text-muted-foreground'>把服务地址和认证 token 配到环境变量里。</p>
-                      <CodeBlock>{`export ANTHROPIC_BASE_URL='https://www.modelbridge.cloud'
-export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
+                      <h3 className='mb-2 text-sm font-semibold'>3. 安装 Claude Code CLI</h3>
+                      <p className='text-sm text-muted-foreground'>使用 npm 全局安装 Claude Code CLI。</p>
+                      <CodeBlock>{`npm i @anthropic-ai/claude-code -g`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>4. 启动 Claude Code</h3>
-                      <p className='text-sm text-muted-foreground'>进入项目目录后启动 Claude Code，然后开始使用。</p>
-                      <CodeBlock>{`claude`}</CodeBlock>
-                      <div className='mt-3'>
-                        <CodeBlock>{`cd /path/to/your/project`}</CodeBlock>
-                      </div>
-                      <div className='mt-3'>
-                        <CodeBlock>{`/model`}</CodeBlock>
-                      </div>
+                      <h3 className='mb-2 text-sm font-semibold'>4. 配置 ModelBridge</h3>
+                      <p className='text-sm text-muted-foreground'>
+                        把下面内容追加到 <code className='mx-1 rounded bg-muted px-1 py-0.5'>~/.zshrc</code>，然后执行
+                        <code className='mx-1 rounded bg-muted px-1 py-0.5'>source ~/.zshrc</code> 让配置生效。
+                      </p>
+                      <CodeBlock>{`cat >> ~/.zshrc <<'EOF'
+
+# Claude Code via ModelBridge
+# ANTHROPIC_AUTH_TOKEN到https://www.modelbridge.cloud/keys创建获取
+export ANTHROPIC_BASE_URL="https://www.modelbridge.cloud"
+export ANTHROPIC_AUTH_TOKEN="sk-你的ModelBridge_API_KEY"
+export ANTHROPIC_API_KEY=""
+EOF
+
+source ~/.zshrc`}</CodeBlock>
+                    </div>
+                    <div>
+                      <h3 className='mb-2 text-sm font-semibold'>5. 启动 Claude Code 测试</h3>
+                      <p className='text-sm text-muted-foreground'>进入一个测试目录后，直接启动 Claude Code 验证配置是否生效。</p>
+                      <CodeBlock>{`cd /path/to/your/project
+claude`}</CodeBlock>
                     </div>
                   </div>
                   </Section>
