@@ -161,21 +161,44 @@ brew install node`}</CodeBlock>
                         </div>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>4. 配置</h3>
-                        <CodeBlock>{`export OPENAI_BASE_URL='https://www.modelbridge.cloud/v1'
-export OPENAI_API_KEY='sk-xxxx'`}</CodeBlock>
+                        <h3 className='mb-2 text-sm font-semibold'>4. 手动创建 `~/.codex/config.toml`</h3>
+                        <CodeBlock>{`mkdir -p ~/.codex
+chmod 700 ~/.codex
+
+cat > ~/.codex/config.toml <<'EOF'
+model = "gpt-5-codex"
+model_provider = "modelbridge"
+model_reasoning_effort = "medium"
+disable_response_storage = true
+
+[model_providers.modelbridge]
+name = "ModelBridge"
+base_url = "https://www.modelbridge.cloud/v1"
+env_key = "OPENAI_API_KEY"
+wire_api = "responses"
+EOF
+
+chmod 600 ~/.codex/config.toml`}</CodeBlock>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>5. 开始使用</h3>
-                        <CodeBlock>{`codex`}</CodeBlock>
+                        <h3 className='mb-2 text-sm font-semibold'>5. 配置 API Key</h3>
+                        <p className='text-sm text-muted-foreground'>
+                          推荐先用环境变量方式，最清晰，也最不容易把 key 写死到配置里。
+                        </p>
                         <div className='mt-3'>
-                          <CodeBlock>{`cd /path/to/your/project`}</CodeBlock>
+                          <CodeBlock>{`export OPENAI_API_KEY="sk-你的ModelBridge_API_KEY"`}</CodeBlock>
                         </div>
                         <div className='mt-3'>
-                          <CodeBlock>{`codex`}</CodeBlock>
+                          <CodeBlock>{`echo 'export OPENAI_API_KEY="sk-你的ModelBridge_API_KEY"' >> ~/.zshrc
+source ~/.zshrc`}</CodeBlock>
                         </div>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>6. 启动 Codex 测试</h3>
+                        <p className='text-sm text-muted-foreground'>进入一个测试目录后启动 Codex。</p>
                         <div className='mt-3'>
-                          <CodeBlock>{`/model`}</CodeBlock>
+                          <CodeBlock>{`cd /path/to/your/project
+codex`}</CodeBlock>
                         </div>
                       </div>
                     </div>
@@ -252,26 +275,29 @@ nvm install 22`}</CodeBlock>
                         <h3 className='mb-2 text-sm font-semibold'>4. 安装 Codex CLI</h3>
                         <CodeBlock>{`npm i -g @openai/codex`}</CodeBlock>
                       </div>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>5. 配置</h3>
-                      <CodeBlock>{`export OPENAI_BASE_URL='https://www.modelbridge.cloud/v1'
-export OPENAI_API_KEY='sk-xxxx'`}</CodeBlock>
-                    </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>6. 开始使用</h3>
-                        <CodeBlock>{`wsl`}</CodeBlock>
+                        <h3 className='mb-2 text-sm font-semibold'>5. 配置 API Key</h3>
+                        <p className='text-sm text-muted-foreground'>
+                          推荐先用环境变量方式，最清晰，也最不容易把 key 写死到配置里。
+                        </p>
                         <div className='mt-3'>
-                          <CodeBlock>{`codex`}</CodeBlock>
+                          <CodeBlock>{`export OPENAI_API_KEY="sk-你的ModelBridge_API_KEY"`}</CodeBlock>
                         </div>
+                        <div className='mt-3'>
+                          <CodeBlock>{`echo 'export OPENAI_API_KEY="sk-你的ModelBridge_API_KEY"' >> ~/.zshrc
+source ~/.zshrc`}</CodeBlock>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>6. 启动 Codex 测试</h3>
+                        <p className='text-sm text-muted-foreground'>进入一个测试目录后启动 Codex。</p>
                         <div className='mt-3'>
                           <CodeBlock>{`cd /mnt/c/path/to/your/project
 codex`}</CodeBlock>
                         </div>
-                        <div className='mt-3'>
-                          <CodeBlock>{`/model`}</CodeBlock>
-                        </div>
                       </div>
                     </div>
+                  </div>
                   </Section>
                 )}
               </TabsContent>
@@ -326,22 +352,45 @@ sudo apt-get install -y nodejs`}</CodeBlock>
                           <CodeBlock>{`codex --version`}</CodeBlock>
                         </div>
                       </div>
-                    <div>
-                      <h3 className='mb-2 text-sm font-semibold'>3. 配置</h3>
-                      <CodeBlock>{`export OPENAI_BASE_URL='https://www.modelbridge.cloud/v1'
-export OPENAI_API_KEY='sk-xxxx'`}</CodeBlock>
-                    </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>4. 开始使用</h3>
-                        <CodeBlock>{`codex`}</CodeBlock>
+                        <h3 className='mb-2 text-sm font-semibold'>3. 手动创建 `~/.codex/config.toml`</h3>
+                        <CodeBlock>{`mkdir -p ~/.codex
+chmod 700 ~/.codex
+
+cat > ~/.codex/config.toml <<'EOF'
+model = "gpt-5-codex"
+model_provider = "modelbridge"
+model_reasoning_effort = "medium"
+disable_response_storage = true
+
+[model_providers.modelbridge]
+name = "ModelBridge"
+base_url = "https://www.modelbridge.cloud/v1"
+env_key = "OPENAI_API_KEY"
+wire_api = "responses"
+EOF
+
+chmod 600 ~/.codex/config.toml`}</CodeBlock>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>4. 配置 API Key</h3>
+                        <p className='text-sm text-muted-foreground'>
+                          推荐先用环境变量方式，最清晰，也最不容易把 key 写死到配置里。
+                        </p>
                         <div className='mt-3'>
-                          <CodeBlock>{`cd /path/to/your/project`}</CodeBlock>
+                          <CodeBlock>{`export OPENAI_API_KEY="sk-你的ModelBridge_API_KEY"`}</CodeBlock>
                         </div>
                         <div className='mt-3'>
-                          <CodeBlock>{`codex`}</CodeBlock>
+                          <CodeBlock>{`echo 'export OPENAI_API_KEY="sk-你的ModelBridge_API_KEY"' >> ~/.zshrc
+source ~/.zshrc`}</CodeBlock>
                         </div>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>5. 启动 Codex 测试</h3>
+                        <p className='text-sm text-muted-foreground'>进入一个测试目录后启动 Codex。</p>
                         <div className='mt-3'>
-                          <CodeBlock>{`/model`}</CodeBlock>
+                          <CodeBlock>{`cd /path/to/your/project
+codex`}</CodeBlock>
                         </div>
                       </div>
                     </div>
