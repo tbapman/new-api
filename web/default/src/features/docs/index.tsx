@@ -257,60 +257,56 @@ codex`}</CodeBlock>
 
               <TabsContent value='windows' className='space-y-6'>
                 {activeApp === 'claude' ? (
-                  <Section title='WSL Ubuntu 安装 Claude Code' id='windows'>
+                  <Section title='Windows 安装 Claude Code' id='windows'>
                     <div className='space-y-4'>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>1. 安装 WSL</h3>
-                        <p className='text-sm text-muted-foreground'>用管理员身份打开 PowerShell，执行下面命令安装 WSL。</p>
-                        <CodeBlock>{`wsl --install`}</CodeBlock>
-                        <p className='mt-3 text-sm text-muted-foreground'>安装完成后重启电脑，然后打开 Ubuntu，设置 Linux 用户名和密码。</p>
-                        <p className='mt-3 text-sm text-muted-foreground'>检查 WSL 是否正常：</p>
-                        <CodeBlock>{`uname -a`}</CodeBlock>
-                      </div>
-                      <div>
-                        <h3 className='mb-2 text-sm font-semibold'>2. 在 WSL 里安装 Node.js</h3>
-                        <p className='text-sm text-muted-foreground'>进入 Ubuntu 后，先更新系统软件包并安装 curl。</p>
-                        <CodeBlock>{`sudo apt update
-sudo apt install -y curl`}</CodeBlock>
-                        <p className='mt-3 text-sm text-muted-foreground'>推荐使用 nvm 安装 Node.js：</p>
-                        <CodeBlock>{`curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash`}</CodeBlock>
-                        <p className='mt-3 text-sm text-muted-foreground'>重新加载 shell：</p>
-                        <CodeBlock>{`source ~/.bashrc`}</CodeBlock>
-                        <p className='mt-3 text-sm text-muted-foreground'>安装 Node LTS：</p>
-                        <CodeBlock>{`nvm install --lts
-nvm use --lts`}</CodeBlock>
-                        <p className='mt-3 text-sm text-muted-foreground'>检查 Node.js 和 npm：</p>
+                        <h3 className='mb-2 text-sm font-semibold'>1. 安装 Node.js</h3>
+                        <p className='text-sm text-muted-foreground'>
+                          先去安装 <strong>Node.js LTS</strong>。安装完成后，打开 PowerShell 检查版本。
+                        </p>
                         <CodeBlock>{`node -v
 npm -v`}</CodeBlock>
+                        <p className='mt-3 text-sm text-muted-foreground'>
+                          只要 Node.js 是 18 或更高就可以。官方 npm 安装方式要求 Node.js 18+。
+                        </p>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>3. 在 WSL 里安装 Claude Code</h3>
-                        <p className='text-sm text-muted-foreground'>使用 npm 全局安装 Claude Code。</p>
+                        <h3 className='mb-2 text-sm font-semibold'>2. 安装 Claude Code</h3>
+                        <p className='text-sm text-muted-foreground'>在 PowerShell 里执行：</p>
                         <CodeBlock>{`npm install -g @anthropic-ai/claude-code`}</CodeBlock>
-                        <p className='mt-3 text-sm text-muted-foreground'>检查安装结果：</p>
+                        <p className='mt-3 text-sm text-muted-foreground'>检查：</p>
                         <CodeBlock>{`claude --version
-which claude`}</CodeBlock>
+where claude`}</CodeBlock>
+                        <p className='mt-3 text-sm text-muted-foreground'>如果能看到版本号，说明安装成功。</p>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>4. 在 WSL 里配置 ModelBridge</h3>
-                        <CodeBlock>{`cat >> ~/.bashrc <<'EOF'
-
-# Claude Code via ModelBridge
-export ANTHROPIC_BASE_URL="https://www.modelbridge.cloud"
-export ANTHROPIC_AUTH_TOKEN="sk-你的ModelBridge_API_KEY"
-export ANTHROPIC_API_KEY=""
-EOF
-
-source ~/.bashrc`}</CodeBlock>
-                        <p className='mt-3 text-sm text-muted-foreground'>检查环境变量是否生效，不要完整打印 key：</p>
-                        <CodeBlock>{`echo "$ANTHROPIC_BASE_URL"
-echo "\${ANTHROPIC_AUTH_TOKEN:0:8}"
-echo "$ANTHROPIC_API_KEY"`}</CodeBlock>
+                        <h3 className='mb-2 text-sm font-semibold'>3. 配置 ModelBridge 环境变量</h3>
+                        <p className='text-sm text-muted-foreground'>你的域名是：</p>
+                        <CodeBlock>{`https://www.modelbridge.cloud/`}</CodeBlock>
+                        <p className='mt-3 text-sm text-muted-foreground'>建议 Claude Code 的 base URL 配成：</p>
+                        <CodeBlock>{`https://www.modelbridge.cloud`}</CodeBlock>
+                        <p className='mt-3 text-sm text-muted-foreground'>在 PowerShell 执行，替换成你的真实 key：</p>
+                        <CodeBlock>{`setx ANTHROPIC_BASE_URL "https://www.modelbridge.cloud"
+setx ANTHROPIC_AUTH_TOKEN "sk-你的ModelBridge_API_KEY"
+setx ANTHROPIC_API_KEY ""`}</CodeBlock>
+                        <p className='mt-3 text-sm text-muted-foreground'>
+                          执行完后，关闭当前 PowerShell，重新打开一个新的 PowerShell。
+                        </p>
+                        <p className='mt-3 text-sm text-muted-foreground'>检查：</p>
+                        <CodeBlock>{`echo $env:ANTHROPIC_BASE_URL
+echo $env:ANTHROPIC_AUTH_TOKEN
+echo $env:ANTHROPIC_API_KEY`}</CodeBlock>
+                        <p className='mt-3 text-sm text-muted-foreground'>安全一点可以只显示前几位：</p>
+                        <CodeBlock>{`$env:ANTHROPIC_AUTH_TOKEN.Substring(0, 8)`}</CodeBlock>
+                        <p className='mt-3 text-sm text-muted-foreground'>
+                          Claude 官方环境变量文档说明，`ANTHROPIC_BASE_URL` 用于指定自定义 API 网关 / 代理；`ANTHROPIC_AUTH_TOKEN`
+                          会作为 `Authorization: Bearer ...` 发送；`ANTHROPIC_API_KEY` 会作为 `X-Api-Key` 发送。
+                        </p>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>5. 启动 Claude Code 测试</h3>
+                        <h3 className='mb-2 text-sm font-semibold'>4. 测试 Claude Code</h3>
                         <p className='text-sm text-muted-foreground'>进入一个测试目录后，直接启动 Claude 验证配置是否生效。</p>
-                        <CodeBlock>{`cd /path/to/your/project
+                        <CodeBlock>{`打开项目终端
 claude`}</CodeBlock>
                       </div>
                     </div>
