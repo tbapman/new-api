@@ -105,19 +105,23 @@ export function Docs() {
                   <div className='space-y-4'>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>1. 安装 Claude Code CLI</h3>
+                      <p className='text-sm text-muted-foreground'>先在 macOS 上安装 Claude Code CLI。</p>
                       <CodeBlock>{`curl -fsSL https://claude.ai/install.sh | bash`}</CodeBlock>
                     </div>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>2. 获取 API 密钥</h3>
+                      <p className='text-sm text-muted-foreground'>打开密钥页面，复制可用的 API Key。</p>
                       <CodeBlock>{`https://www.modelbridge.cloud/keys`}</CodeBlock>
                     </div>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>3. 环境变量</h3>
+                      <p className='text-sm text-muted-foreground'>把服务地址和认证 token 配到环境变量里。</p>
                       <CodeBlock>{`export ANTHROPIC_BASE_URL='https://www.modelbridge.cloud'
 export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>4. 开始使用 Claude Code</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>4. 启动 Claude Code</h3>
+                      <p className='text-sm text-muted-foreground'>进入项目目录后启动 Claude Code，再选择要使用的模型。</p>
                       <CodeBlock>{`claude`}</CodeBlock>
                       <div className='mt-3'>
                         <CodeBlock>{`cd /path/to/your/project`}</CodeBlock>
@@ -127,7 +131,8 @@ export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
                       </div>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>4. macOS 常见问题解决</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>5. macOS 常见问题处理</h3>
+                      <p className='text-sm text-muted-foreground'>如果 macOS 提示安全拦截，可以按下面步骤放行。</p>
                       <StepList
                         items={[
                           '打开“系统偏好设置”。',
@@ -146,15 +151,18 @@ export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
                     <div className='space-y-4'>
                       <div>
                         <h3 className='mb-2 text-sm font-semibold'>1. 安装 Homebrew</h3>
+                        <p className='text-sm text-muted-foreground'>如果还没有 Homebrew，先安装它，后面会用它装 Node.js。</p>
                         <CodeBlock>{`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`}</CodeBlock>
                       </div>
                       <div>
                         <h3 className='mb-2 text-sm font-semibold'>2. 安装 Node.js</h3>
+                        <p className='text-sm text-muted-foreground'>用 Homebrew 安装 Node.js，作为 Codex CLI 的运行环境。</p>
                         <CodeBlock>{`brew update
 brew install node`}</CodeBlock>
                       </div>
                       <div>
                         <h3 className='mb-2 text-sm font-semibold'>3. 安装 Codex CLI</h3>
+                        <p className='text-sm text-muted-foreground'>接着用 npm 全局安装 Codex CLI，并检查版本是否可用。</p>
                         <CodeBlock>{`npm install -g @openai/codex`}</CodeBlock>
                         <div className='mt-3'>
                           <CodeBlock>{`codex --version`}</CodeBlock>
@@ -162,11 +170,12 @@ brew install node`}</CodeBlock>
                       </div>
                       <div>
                         <h3 className='mb-2 text-sm font-semibold'>4. 手动创建 `~/.codex/config.toml`</h3>
+                        <p className='text-sm text-muted-foreground'>先创建配置目录，再写入 Codex 配置文件。</p>
                         <CodeBlock>{`mkdir -p ~/.codex
 chmod 700 ~/.codex
 
 cat > ~/.codex/config.toml <<'EOF'
-model = "gpt-5-codex"
+model = "gpt-5.4-mini"
 model_provider = "modelbridge"
 model_reasoning_effort = "medium"
 disable_response_storage = true
@@ -181,9 +190,9 @@ EOF
 chmod 600 ~/.codex/config.toml`}</CodeBlock>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>5. 配置 API Key</h3>
+                        <h3 className='mb-2 text-sm font-semibold'>5. 设置 API Key</h3>
                         <p className='text-sm text-muted-foreground'>
-                          推荐先用环境变量方式，最清晰，也最不容易把 key 写死到配置里。
+                          先把 API Key 配到当前终端里，最清晰，也最不容易把 key 写死到配置里。
                         </p>
                         <div className='mt-3'>
                           <CodeBlock>{`export OPENAI_API_KEY="sk-你的ModelBridge_API_KEY"`}</CodeBlock>
@@ -199,7 +208,7 @@ source ~/.zshrc`}</CodeBlock>
                       </div>
                       <div>
                         <h3 className='mb-2 text-sm font-semibold'>6. 启动 Codex 测试</h3>
-                        <p className='text-sm text-muted-foreground'>进入一个测试目录后启动 Codex。</p>
+                        <p className='text-sm text-muted-foreground'>进入一个测试目录后，直接启动 Codex 验证配置是否生效。</p>
                         <div className='mt-3'>
                           <CodeBlock>{`cd /path/to/your/project
 codex`}</CodeBlock>
@@ -216,6 +225,7 @@ codex`}</CodeBlock>
                   <div className='space-y-4'>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>1. 安装 Node.js 环境</h3>
+                      <p className='text-sm text-muted-foreground'>先安装 Node.js，确保后面可以运行 Claude Code。</p>
                       <StepList
                         items={[
                           '打开 Node.js 官方站点并下载 LTS 版本。',
@@ -230,9 +240,11 @@ npm --version`}</CodeBlock>
                     </div>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>2. 安装 Git Bash</h3>
+                      <p className='text-sm text-muted-foreground'>如果系统里还没有 Git Bash，先安装它。</p>
                     </div>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>3. 安装 Claude Code</h3>
+                      <p className='text-sm text-muted-foreground'>在终端里全局安装 Claude Code。</p>
                       <CodeBlock>{`npm install -g @anthropic-ai/claude-code`}</CodeBlock>
                       <div className='mt-3'>
                         <CodeBlock>{`claude --version`}</CodeBlock>
@@ -240,15 +252,18 @@ npm --version`}</CodeBlock>
                     </div>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>4. 获取 API 密钥</h3>
+                      <p className='text-sm text-muted-foreground'>打开密钥页面，复制可用的 API Key。</p>
                       <CodeBlock>{`https://www.modelbridge.cloud/keys`}</CodeBlock>
                     </div>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>5. 环境变量</h3>
+                      <p className='text-sm text-muted-foreground'>把基础地址和认证 token 配到环境变量里。</p>
                       <CodeBlock>{`export ANTHROPIC_BASE_URL='https://www.modelbridge.cloud'
 export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>6. 开始使用 Claude Code</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>6. 启动 Claude Code</h3>
+                      <p className='text-sm text-muted-foreground'>进入项目目录后启动 Claude Code，然后开始使用。</p>
                       <CodeBlock>{`claude`}</CodeBlock>
                       <div className='mt-3'>
                         <CodeBlock>{`cd C:\\path\\to\\your\\project`}</CodeBlock>
@@ -263,44 +278,69 @@ export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
                   <Section title='Windows' id='codex-windows'>
                     <div className='space-y-4'>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>1. 打开终端</h3>
+                        <h3 className='mb-2 text-sm font-semibold'>1. 打开 WSL 终端</h3>
+                        <p className='text-sm text-muted-foreground'>先在终端里进入 WSL 环境，后面的命令都在这里执行。</p>
                         <CodeBlock>{`wsl`}</CodeBlock>
                       </div>
                       <div>
                         <h3 className='mb-2 text-sm font-semibold'>2. 安装 WSL2</h3>
+                        <p className='text-sm text-muted-foreground'>如果你的电脑还没有安装 WSL2，可以先执行这条命令完成安装。</p>
                         <CodeBlock>{`wsl --install`}</CodeBlock>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>3. 安装 Node 22</h3>
+                        <h3 className='mb-2 text-sm font-semibold'>3. 安装 Node.js 22</h3>
+                        <p className='text-sm text-muted-foreground'>接着安装 Node.js 22，作为后续安装 Codex CLI 的运行环境。</p>
                         <CodeBlock>{`curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
 nvm install 22`}</CodeBlock>
                       </div>
                       <div>
                         <h3 className='mb-2 text-sm font-semibold'>4. 安装 Codex CLI</h3>
+                        <p className='text-sm text-muted-foreground'>使用 npm 全局安装 Codex CLI。</p>
                         <CodeBlock>{`npm i -g @openai/codex`}</CodeBlock>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>5. 配置 API Key</h3>
+                        <h3 className='mb-2 text-sm font-semibold'>5. 打开 PowerShell</h3>
                         <p className='text-sm text-muted-foreground'>
-                          推荐先用环境变量方式，最清晰，也最不容易把 key 写死到配置里。
+                          按 <code className='mx-1 rounded bg-muted px-1 py-0.5'>Win</code> +{' '}
+                          <code className='mx-1 rounded bg-muted px-1 py-0.5'>R</code>，输入
+                          <code className='mx-1 rounded bg-muted px-1 py-0.5'>powershell</code>，然后回车打开。
                         </p>
                         <div className='mt-3'>
-                          <CodeBlock>{`export OPENAI_API_KEY="sk-你的ModelBridge_API_KEY"`}</CodeBlock>
-                        </div>
-                        <p className='mt-3 text-sm text-muted-foreground'>
-                          如果希望每次打开终端都生效，可以把这行写入
-                          <code className='mx-1 rounded bg-muted px-1 py-0.5'>~/.zshrc</code>，但这一步不是必须的。
-                        </p>
-                        <div className='mt-3'>
-                          <CodeBlock>{`echo 'export OPENAI_API_KEY="sk-你的ModelBridge_API_KEY"' >> ~/.zshrc
-source ~/.zshrc`}</CodeBlock>
+                          <CodeBlock>{`powershell`}</CodeBlock>
                         </div>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>6. 启动 Codex 测试</h3>
-                        <p className='text-sm text-muted-foreground'>进入一个测试目录后启动 Codex。</p>
+                        <h3 className='mb-2 text-sm font-semibold'>6. 创建 Codex 配置文件</h3>
+                        <p className='text-sm text-muted-foreground'>先创建配置目录，再打开配置文件进行编辑。</p>
+                        <CodeBlock>{`New-Item -ItemType Directory -Force "$env:USERPROFILE\\.codex"
+notepad "$env:USERPROFILE\\.codex\\config.toml"`}</CodeBlock>
+                        <p className='mt-3 text-sm text-muted-foreground'>然后把下面这段内容粘贴进去：</p>
                         <div className='mt-3'>
-                          <CodeBlock>{`cd /mnt/c/path/to/your/project
+                          <CodeBlock>{`model = "gpt-5.4-mini"
+model_provider = "modelbridge"
+model_reasoning_effort = "medium"
+disable_response_storage = true
+
+[model_providers.modelbridge]
+name = "ModelBridge"
+base_url = "https://www.modelbridge.cloud/v1"
+env_key = "OPENAI_API_KEY"
+wire_api = "responses"`}</CodeBlock>
+                        </div>
+                        <p className='mt-3 text-sm text-muted-foreground'>粘贴完成后，保存并关闭记事本。</p>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>7. 设置 API Key</h3>
+                        <p className='text-sm text-muted-foreground'>回到 PowerShell，把下面命令里的 key 换成你的真实 API Key 后执行。</p>
+                        <div className='mt-3'>
+                          <CodeBlock>{`setx OPENAI_API_KEY "sk-你的ModelBridge_API_KEY"`}</CodeBlock>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className='mb-2 text-sm font-semibold'>8. 启动 Codex 测试</h3>
+                        <p className='text-sm text-muted-foreground'>进入一个测试目录后，直接启动 Codex 验证配置是否生效。</p>
+                        <div className='mt-3'>
+                          <CodeBlock>{`cd /path/to/your/project
 codex`}</CodeBlock>
                         </div>
                       </div>
@@ -315,6 +355,7 @@ codex`}</CodeBlock>
                   <div className='space-y-4'>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>1. 安装 Claude Code</h3>
+                      <p className='text-sm text-muted-foreground'>先在 Linux 上安装 Claude Code。</p>
                       <CodeBlock>{`curl -fsSL https://claude.ai/install.sh | bash`}</CodeBlock>
                       <div className='mt-3'>
                         <CodeBlock>{`sudo curl -fsSL https://claude.ai/install.sh | bash`}</CodeBlock>
@@ -325,15 +366,18 @@ codex`}</CodeBlock>
                     </div>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>2. 获取 API 密钥</h3>
+                      <p className='text-sm text-muted-foreground'>打开密钥页面，复制可用的 API Key。</p>
                       <CodeBlock>{`https://www.modelbridge.cloud/keys`}</CodeBlock>
                     </div>
                     <div>
                       <h3 className='mb-2 text-sm font-semibold'>3. 环境变量</h3>
+                      <p className='text-sm text-muted-foreground'>把服务地址和认证 token 配到环境变量里。</p>
                       <CodeBlock>{`export ANTHROPIC_BASE_URL='https://www.modelbridge.cloud'
 export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
                     </div>
                     <div>
-                      <h3 className='mb-2 text-sm font-semibold'>4. 开始使用 Claude Code</h3>
+                      <h3 className='mb-2 text-sm font-semibold'>4. 启动 Claude Code</h3>
+                      <p className='text-sm text-muted-foreground'>进入项目目录后启动 Claude Code，然后开始使用。</p>
                       <CodeBlock>{`claude`}</CodeBlock>
                       <div className='mt-3'>
                         <CodeBlock>{`cd /path/to/your/project`}</CodeBlock>
@@ -349,11 +393,13 @@ export ANTHROPIC_AUTH_TOKEN='sk-xxxx'`}</CodeBlock>
                     <div className='space-y-4'>
                       <div>
                         <h3 className='mb-2 text-sm font-semibold'>1. 安装 Node.js</h3>
+                        <p className='text-sm text-muted-foreground'>先安装 Node.js，作为 Codex CLI 的运行环境。</p>
                         <CodeBlock>{`sudo curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
 sudo apt-get install -y nodejs`}</CodeBlock>
                       </div>
                       <div>
                         <h3 className='mb-2 text-sm font-semibold'>2. 安装 Codex CLI</h3>
+                        <p className='text-sm text-muted-foreground'>使用 npm 全局安装 Codex CLI。</p>
                         <CodeBlock>{`npm i -g @openai/codex`}</CodeBlock>
                         <div className='mt-3'>
                           <CodeBlock>{`codex --version`}</CodeBlock>
@@ -361,11 +407,12 @@ sudo apt-get install -y nodejs`}</CodeBlock>
                       </div>
                       <div>
                         <h3 className='mb-2 text-sm font-semibold'>3. 手动创建 `~/.codex/config.toml`</h3>
+                        <p className='text-sm text-muted-foreground'>先创建配置目录，再写入 Codex 配置文件。</p>
                         <CodeBlock>{`mkdir -p ~/.codex
 chmod 700 ~/.codex
 
 cat > ~/.codex/config.toml <<'EOF'
-model = "gpt-5-codex"
+model = "gpt-5.4-mini"
 model_provider = "modelbridge"
 model_reasoning_effort = "medium"
 disable_response_storage = true
@@ -380,9 +427,9 @@ EOF
 chmod 600 ~/.codex/config.toml`}</CodeBlock>
                       </div>
                       <div>
-                        <h3 className='mb-2 text-sm font-semibold'>4. 配置 API Key</h3>
+                        <h3 className='mb-2 text-sm font-semibold'>4. 设置 API Key</h3>
                         <p className='text-sm text-muted-foreground'>
-                          推荐先用环境变量方式，最清晰，也最不容易把 key 写死到配置里。
+                          在当前终端里先设置环境变量，最清晰，也最不容易把 key 写死到配置里。
                         </p>
                         <div className='mt-3'>
                           <CodeBlock>{`export OPENAI_API_KEY="sk-你的ModelBridge_API_KEY"`}</CodeBlock>
@@ -398,7 +445,7 @@ source ~/.zshrc`}</CodeBlock>
                       </div>
                       <div>
                         <h3 className='mb-2 text-sm font-semibold'>5. 启动 Codex 测试</h3>
-                        <p className='text-sm text-muted-foreground'>进入一个测试目录后启动 Codex。</p>
+                        <p className='text-sm text-muted-foreground'>进入一个测试目录后，直接启动 Codex 验证配置是否生效。</p>
                         <div className='mt-3'>
                           <CodeBlock>{`cd /path/to/your/project
 codex`}</CodeBlock>
