@@ -95,10 +95,12 @@ export function useTopNavLinks(): TopNavLink[] {
     return parseHeaderNavModules(status?.HeaderNavModules)
   }, [status?.HeaderNavModules])
 
-  // Documentation link always points to the public docs site.
+  // Documentation link: prefer internal mirror path, fall back to backend-configured link.
   const docsLink =
-    (status?.docs_link as string | undefined) ??
-    'https://docs.newapi.pro/zh/docs/apps'
+    (status?.docs_link as string | undefined) ?? '/docs/apps'
+
+  const docsExternal =
+    typeof docsLink === 'string' && docsLink.startsWith('http')
 
   const isAuthed = !!auth?.user
 
@@ -128,9 +130,9 @@ export function useTopNavLinks(): TopNavLink[] {
     links.push({ title: t('Rankings'), href: '/rankings', disabled })
   }
 
-  // Docs (supports external links)
+  // Docs (supports external links when backend overrides with http(s) URL)
   if (modules?.docs !== false) {
-    links.push({ title: t('Docs'), href: docsLink, external: true })
+    links.push({ title: t('Docs'), href: docsLink, external: docsExternal })
   }
 
   // About

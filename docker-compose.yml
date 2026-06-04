@@ -25,6 +25,7 @@ services:
     volumes:
       - ./data:/data
       - ./logs:/app/logs
+      - ./web/docs-mirror:/data/web/docs-mirror:ro
     environment:
       - SQL_DSN=postgresql://root:wxXLTDHQgyR2ywzDcasVCGA1YvlQKBnA@postgres:5432/new-api
 #      - SQL_DSN=root:wxXLTDHQgyR2ywzDcasVCGA1YvlQKBnA@tcp(mysql:3306)/new-api  # Point to the mysql service, uncomment if using MySQL

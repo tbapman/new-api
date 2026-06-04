@@ -12,6 +12,7 @@ web/default/dist
 web/classic/dist
 web/node_modules
 web/dist
+web/docs-mirror/
 .env
 one-api
 new-api
