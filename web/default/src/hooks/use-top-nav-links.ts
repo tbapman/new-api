@@ -132,7 +132,12 @@ export function useTopNavLinks(): TopNavLink[] {
 
   // Docs (supports external links when backend overrides with http(s) URL)
   if (modules?.docs !== false) {
-    links.push({ title: t('Docs'), href: docsLink, external: docsExternal })
+    links.push({
+      title: t('Docs'),
+      href: docsLink,
+      external: docsExternal,
+      native: !docsExternal,
+    })
   }
 
   // About

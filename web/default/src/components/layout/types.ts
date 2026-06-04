@@ -80,4 +80,6 @@ export type TopNavLink = {
   isActive?: boolean
   disabled?: boolean
   external?: boolean
+  /** Use a plain <a> tag for full-page navigation (for backend-served routes like /docs). */
+  native?: boolean
 }
