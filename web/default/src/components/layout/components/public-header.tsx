@@ -138,6 +138,22 @@ export function PublicHeader(props: PublicHeaderProps) {
                     </a>
                   )
                 }
+                if (link.native) {
+                  return (
+                    <a
+                      key={i}
+                      href={link.href}
+                      className={cn(
+                        'rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors duration-200',
+                        isActive
+                          ? 'text-foreground'
+                          : 'text-muted-foreground hover:text-foreground'
+                      )}
+                    >
+                      {t(link.title)}
+                    </a>
+                  )
+                }
                 return (
                   <Link
                     key={i}
@@ -239,22 +255,31 @@ export function PublicHeader(props: PublicHeaderProps) {
           <nav className='flex flex-col gap-1'>
             {links.map((link, i) => {
               const isActive = pathname === link.href
+              const linkClass = cn(
+                'flex items-center gap-3 py-3 text-base font-medium tracking-tight transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
+                mobileOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
+                isActive ? 'text-foreground' : 'text-muted-foreground'
+              )
+              const style = { transitionDelay: mobileOpen ? `${100 + i * 50}ms` : '0ms' }
+              if (link.external) {
+                return (
+                  <a key={i} href={link.href} target='_blank' rel='noopener noreferrer'
+                    className={linkClass} style={style} onClick={() => setMobileOpen(false)}>
+                    {t(link.title)}
+                  </a>
+                )
+              }
+              if (link.native) {
+                return (
+                  <a key={i} href={link.href} className={linkClass} style={style}
+                    onClick={() => setMobileOpen(false)}>
+                    {t(link.title)}
+                  </a>
+                )
+              }
               return (
-                <Link
-                  key={i}
-                  to={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={cn(
-                    'flex items-center gap-3 py-3 text-base font-medium tracking-tight transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
-                    mobileOpen
-                      ? 'translate-y-0 opacity-100'
-                      : 'translate-y-4 opacity-0',
-                    isActive ? 'text-foreground' : 'text-muted-foreground'
-                  )}
-                  style={{
-                    transitionDelay: mobileOpen ? `${100 + i * 50}ms` : '0ms',
-                  }}
-                >
+                <Link key={i} to={link.href} onClick={() => setMobileOpen(false)}
+                  className={linkClass} style={style}>
                   {t(link.title)}
                 </Link>
               )

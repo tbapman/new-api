@@ -27,6 +27,7 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
         isActive: false,
         disabled: false,
         external: false,
+        native: false,
         ...link,
       })),
     [links]
@@ -44,7 +45,7 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent side='bottom' align='start'>
             {normalizedLinks.map(
-              ({ title, href, isActive, disabled, external }) => (
+              ({ title, href, isActive, disabled, external, native }) => (
                 <DropdownMenuItem
                   key={`${title}-${href}`}
                   render={
@@ -53,6 +54,13 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
                         href={href}
                         target='_blank'
                         rel='noopener noreferrer'
+                        className={!isActive ? 'text-muted-foreground' : ''}
+                      >
+                        {title}
+                      </a>
+                    ) : native ? (
+                      <a
+                        href={href}
                         className={!isActive ? 'text-muted-foreground' : ''}
                       >
                         {title}
@@ -82,13 +90,21 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
         )}
         {...props}
       >
-        {normalizedLinks.map(({ title, href, isActive, disabled, external }) =>
+        {normalizedLinks.map(({ title, href, isActive, disabled, external, native }) =>
           external ? (
             <a
               key={`${title}-${href}`}
               href={href}
               target='_blank'
               rel='noopener noreferrer'
+              className={`hover:text-primary text-sm font-medium transition-colors ${isActive ? '' : 'text-muted-foreground'}`}
+            >
+              {title}
+            </a>
+          ) : native ? (
+            <a
+              key={`${title}-${href}`}
+              href={href}
               className={`hover:text-primary text-sm font-medium transition-colors ${isActive ? '' : 'text-muted-foreground'}`}
             >
               {title}
