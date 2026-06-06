@@ -1,7 +1,11 @@
 import { X } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useRef, useLayoutEffect } from 'react'
 
 const BANNER_KEY = 'announcement_banner_dismissed_v1'
+
+function setCSSBannerHeight(px: number) {
+  document.documentElement.style.setProperty('--banner-height', `${px}px`)
+}
 
 export function AnnouncementBanner() {
   const [dismissed, setDismissed] = useState(() => {
@@ -11,6 +15,20 @@ export function AnnouncementBanner() {
       return false
     }
   })
+  const ref = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    if (dismissed) {
+      setCSSBannerHeight(0)
+      return
+    }
+    const el = ref.current
+    if (!el) return
+    const ro = new ResizeObserver(() => setCSSBannerHeight(el.offsetHeight))
+    ro.observe(el)
+    setCSSBannerHeight(el.offsetHeight)
+    return () => ro.disconnect()
+  }, [dismissed])
 
   if (dismissed) return null
 
@@ -24,7 +42,10 @@ export function AnnouncementBanner() {
   }
 
   return (
-    <div className='relative z-50 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 text-center text-sm text-white'>
+    <div
+      ref={ref}
+      className='sticky top-0 z-[60] flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 text-center text-sm text-white'
+    >
       <span>
         💳 订阅 ChatGPT Plus / Claude / Gemini？用 AISubHub 虚拟卡，一键搞定 →{' '}
         <a
