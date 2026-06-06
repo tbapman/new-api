@@ -1,7 +1,8 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useRouterState } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useSystemConfig } from '@/hooks/use-system-config'
 import { Skeleton } from '@/components/ui/skeleton'
+import { SupportContactFab } from '@/components/layout/components/support-contact-fab'
 
 type AuthLayoutProps = {
   children: React.ReactNode
@@ -10,6 +11,9 @@ type AuthLayoutProps = {
 export function AuthLayout({ children }: AuthLayoutProps) {
   const { t } = useTranslation()
   const { systemName, logo, loading } = useSystemConfig()
+  const routerState = useRouterState()
+  const pathname = routerState.location.pathname
+  const showSupportFab = pathname === '/sign-in'
 
   return (
     <div className='relative grid h-svh max-w-none'>
@@ -39,6 +43,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           {children}
         </div>
       </div>
+      {showSupportFab && <SupportContactFab />}
     </div>
   )
 }
