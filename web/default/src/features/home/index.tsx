@@ -45,10 +45,10 @@ export function Home() {
   return (
     <PublicLayout showMainContainer={false}>
       <Hero isAuthenticated={isAuthenticated} />
+      <Tutorial />
       <Stats />
       <Features />
       <HowItWorks />
-      <Tutorial />
       <CTA isAuthenticated={isAuthenticated} />
       <Footer />
     </PublicLayout>
