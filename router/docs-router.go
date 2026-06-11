@@ -31,23 +31,29 @@ func SetDocsRouter(router *gin.Engine) {
 		return
 	}
 
-	// /_next/image — Next.js image optimization API used by docs JS client code.
-	router.GET("/_next/image", serveDocsImage)
-
-	// /_next/static/* — Next.js JS/CSS chunks loaded dynamically by docs scripts.
-	// The main SPA (Rsbuild) never uses /_next/; safe to proxy entirely to the mirror.
-	router.GET("/_next/static/*path", func(c *gin.Context) {
-		rel := "_next/static" + c.Param("path")
-		if idx := strings.Index(rel, "?"); idx != -1 {
-			rel = rel[:idx]
-		}
-		serveDocsMirrorFile(c, rel)
-	})
-
-	// /_next/* catch-all — RSC data fetches and other Next.js internals.
-	// Return 404 so Next.js handles gracefully; prevents SPA HTML being parsed as JS.
+	// Single /_next/* handler for all Next.js internals used by the docs mirror.
+	// Gin/httprouter panics if you mix /_next/image (static) + /_next/static/*path
+	// + /_next/*path (wildcard) — they conflict. One wildcard handles all cases.
+	// The main SPA (Rsbuild) never uses /_next/; safe to intercept here.
 	router.GET("/_next/*path", func(c *gin.Context) {
-		c.Status(http.StatusNotFound)
+		p := c.Param("path") // starts with "/"
+		// Strip query string
+		if idx := strings.Index(p, "?"); idx != -1 {
+			p = p[:idx]
+		}
+		switch {
+		case p == "/image":
+			// /_next/image?url=... → serve pre-downloaded media file
+			serveDocsImage(c)
+		case strings.HasPrefix(p, "/static/"):
+			// /_next/static/chunks/*.js, /_next/static/css/*.css, etc.
+			rel := "_next" + p
+			serveDocsMirrorFile(c, rel)
+		default:
+			// /_next/data/... RSC payloads and anything else we don't have.
+			// Return 404 so Next.js handles it gracefully instead of seeing SPA HTML.
+			c.Status(http.StatusNotFound)
+		}
 	})
 
 	router.GET("/docs", func(c *gin.Context) {
