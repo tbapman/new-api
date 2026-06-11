@@ -100,20 +100,26 @@ def rewrite_html(html: str, page_path: str) -> str:
 
 
 # Injected into <head> (before any other scripts) to intercept history.pushState.
-# Next.js client-side routing always calls pushState; overriding it forces a full
-# page load so Go can serve the correct mirrored HTML file.
+# Next.js client-side routing calls pushState with original /zh/docs/... paths.
+# We translate to /docs/... and force a full page load so Go serves the mirror HTML.
 _FORCE_FULL_NAV_SCRIPT = (
     '<script>'
     '(function(){'
+    # Translate /zh/docs/... → /docs/...
+    'function tr(u){'
+    'if(u&&u.startsWith("/zh/docs"))return"/docs"+u.slice(3);'  # /zh = 3 chars
+    'return u;}'
     'var _push=history.pushState.bind(history);'
     'history.pushState=function(s,t,url){'
     'if(url&&typeof url==="string"&&url.startsWith("/")){'
-    'window.location.href=url;return;'
+    'window.location.href=tr(url);return;'
     '}_push(s,t,url);};'
     'var _rep=history.replaceState.bind(history);'
     'history.replaceState=function(s,t,url){'
-    'if(url&&typeof url==="string"&&url.startsWith("/")&&url!==location.pathname+location.search){'
-    'window.location.href=url;return;'
+    'if(url&&typeof url==="string"&&url.startsWith("/")){'
+    'var tu=tr(url);'
+    # Only force reload if URL actually changes (avoid infinite reload on init)
+    'if(tu!==location.pathname+location.search){window.location.href=tu;return;}'
     '}_rep(s,t,url);};'
     '})();'
     '</script>'

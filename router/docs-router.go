@@ -31,17 +31,30 @@ func SetDocsRouter(router *gin.Engine) {
 		return
 	}
 
-	// Handle Next.js image optimization API used by JS client code.
-	// Requests come in as /_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffoo.png&w=...
-	// We serve the pre-downloaded file directly from the mirror.
+	// /_next/image — Next.js image optimization API used by docs JS client code.
 	router.GET("/_next/image", serveDocsImage)
+
+	// /_next/static/* — Next.js JS/CSS chunks loaded dynamically by docs scripts.
+	// The main SPA (Rsbuild) never uses /_next/; safe to proxy entirely to the mirror.
+	router.GET("/_next/static/*path", func(c *gin.Context) {
+		rel := "_next/static" + c.Param("path")
+		if idx := strings.Index(rel, "?"); idx != -1 {
+			rel = rel[:idx]
+		}
+		serveDocsMirrorFile(c, rel)
+	})
+
+	// /_next/* catch-all — RSC data fetches and other Next.js internals.
+	// Return 404 so Next.js handles gracefully; prevents SPA HTML being parsed as JS.
+	router.GET("/_next/*path", func(c *gin.Context) {
+		c.Status(http.StatusNotFound)
+	})
 
 	router.GET("/docs", func(c *gin.Context) {
 		serveDocsMirrorFile(c, "index.html")
 	})
 	router.GET("/docs/*path", func(c *gin.Context) {
 		urlPath := c.Param("path")
-		// Also handle /docs/_next/image for HTML img src attributes
 		if urlPath == "/_next/image" {
 			serveDocsImage(c)
 			return
