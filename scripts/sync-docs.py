@@ -99,20 +99,22 @@ def rewrite_html(html: str, page_path: str) -> str:
     return html
 
 
-# Injected before </body> to force full-page navigation, bypassing Next.js
-# client-side routing (which would fetch RSC payloads we don't have).
+# Injected into <head> (before any other scripts) to intercept history.pushState.
+# Next.js client-side routing always calls pushState; overriding it forces a full
+# page load so Go can serve the correct mirrored HTML file.
 _FORCE_FULL_NAV_SCRIPT = (
     '<script>'
     '(function(){'
-    'document.addEventListener("click",function(e){'
-    'var el=e.target;'
-    'while(el&&el.tagName!=="A")el=el.parentElement;'
-    'if(!el)return;'
-    'var h=el.getAttribute("href");'
-    'if(!h||!h.startsWith("/")||h.startsWith("//"))return;'
-    'e.stopImmediatePropagation();e.preventDefault();'
-    'window.location.href=h;'
-    '},true);'
+    'var _push=history.pushState.bind(history);'
+    'history.pushState=function(s,t,url){'
+    'if(url&&typeof url==="string"&&url.startsWith("/")){'
+    'window.location.href=url;return;'
+    '}_push(s,t,url);};'
+    'var _rep=history.replaceState.bind(history);'
+    'history.replaceState=function(s,t,url){'
+    'if(url&&typeof url==="string"&&url.startsWith("/")&&url!==location.pathname+location.search){'
+    'window.location.href=url;return;'
+    '}_rep(s,t,url);};'
     '})();'
     '</script>'
 )
@@ -143,8 +145,8 @@ def save_html(path: str, content: bytes) -> None:
     out_file.parent.mkdir(parents=True, exist_ok=True)
     html_str = content.decode("utf-8", errors="replace")
     html_str = rewrite_html(html_str, path)
-    # Inject navigation override before </body>
-    html_str = html_str.replace("</body>", _FORCE_FULL_NAV_SCRIPT + "</body>", 1)
+    # Inject history.pushState override into <head> so it runs before Next.js init.
+    html_str = html_str.replace("<head>", "<head>" + _FORCE_FULL_NAV_SCRIPT, 1)
     out_file.write_text(html_str, encoding="utf-8")
 
 
