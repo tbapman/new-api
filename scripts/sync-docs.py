@@ -78,6 +78,24 @@ def rewrite_html(html: str, page_path: str) -> str:
     html = html.replace('href="/assets/', 'href="/docs/assets/')
     html = html.replace('src="/assets/', 'src="/docs/assets/')
 
+    # Rewrite Next.js image optimization API URLs to direct file paths
+    # src="/docs/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffoo.png&w=..."
+    # → src="/docs/_next/static/media/foo.png"
+    import urllib.parse
+
+    def _rewrite_img(m: re.Match) -> str:
+        encoded = m.group(1)
+        decoded = urllib.parse.unquote(encoded)
+        if decoded.startswith("/_next/static/media/"):
+            return f'src="/docs{decoded}"'
+        return m.group(0)
+
+    html = re.sub(
+        r'src="/docs/_next/image\?url=([^&"\']+)[^"\']*"',
+        _rewrite_img,
+        html,
+    )
+
     return html
 
 
