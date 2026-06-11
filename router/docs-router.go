@@ -14,16 +14,18 @@ import (
 // It is resolved relative to the working directory at startup.
 const docsMirrorDir = "web/docs-mirror"
 
-// SetDocsRouter mounts the /docs static mirror if web/docs-mirror/ exists on disk.
-// It handles:
+// SetDocsRouter mounts the docs mirror. Pages are served at their original
+// /zh/docs/... paths so that Next.js JS route definitions match the browser URL,
+// allowing React hydration and interactive components (accordions, etc.) to work.
 //
-//	/docs                            → web/docs-mirror/index.html
-//	/docs/apps                       → web/docs-mirror/apps/index.html
-//	/docs/_next/image?url=...        → web/docs-mirror/_next/static/media/... (doc images)
-//	/docs/_next/static/...           → web/docs-mirror/_next/static/... (JS/CSS assets)
-//	/docs/assets/...                 → web/docs-mirror/assets/...
+// Route summary:
 //
-// Falls back to 503 with a helpful message when the mirror is not present.
+//	/docs            → 302 redirect → /zh/docs
+//	/docs/*path      → 302 redirect → /zh/docs/*path
+//	/zh/docs         → web/docs-mirror/index.html
+//	/zh/docs/*path   → web/docs-mirror/<path>/index.html or exact file
+//	/_next/*path     → web/docs-mirror/_next/static/... | image serve | 404
+//	/assets/newapi.svg → web/docs-mirror/assets/newapi.svg (logo used by docs)
 func SetDocsRouter(router *gin.Engine) {
 	if _, err := os.Stat(docsMirrorDir); os.IsNotExist(err) {
 		router.GET("/docs", docsMirrorMissing)
@@ -31,41 +33,42 @@ func SetDocsRouter(router *gin.Engine) {
 		return
 	}
 
-	// Single /_next/* handler for all Next.js internals used by the docs mirror.
-	// Gin/httprouter panics if you mix /_next/image (static) + /_next/static/*path
-	// + /_next/*path (wildcard) — they conflict. One wildcard handles all cases.
-	// The main SPA (Rsbuild) never uses /_next/; safe to intercept here.
+	// /docs → redirect so top-nav link (/docs/apps) still works
+	router.GET("/docs", func(c *gin.Context) {
+		c.Redirect(http.StatusFound, "/zh/docs")
+	})
+	router.GET("/docs/*path", func(c *gin.Context) {
+		c.Redirect(http.StatusFound, "/zh/docs"+c.Param("path"))
+	})
+
+	// /zh/docs/* — serve mirror. Files saved without the /zh/docs prefix.
+	router.GET("/zh/docs", func(c *gin.Context) {
+		serveDocsMirrorFile(c, "index.html")
+	})
+	router.GET("/zh/docs/*path", func(c *gin.Context) {
+		serveDocsMirrorPath(c, c.Param("path"))
+	})
+
+	// /_next/* — single wildcard handler for all Next.js internals.
+	// Gin/httprouter panics if you mix static + wildcard at the same prefix level.
 	router.GET("/_next/*path", func(c *gin.Context) {
-		p := c.Param("path") // starts with "/"
-		// Strip query string
+		p := c.Param("path")
 		if idx := strings.Index(p, "?"); idx != -1 {
 			p = p[:idx]
 		}
 		switch {
 		case p == "/image":
-			// /_next/image?url=... → serve pre-downloaded media file
 			serveDocsImage(c)
 		case strings.HasPrefix(p, "/static/"):
-			// /_next/static/chunks/*.js, /_next/static/css/*.css, etc.
-			rel := "_next" + p
-			serveDocsMirrorFile(c, rel)
+			serveDocsMirrorFile(c, "_next"+p)
 		default:
-			// /_next/data/... RSC payloads and anything else we don't have.
-			// Return 404 so Next.js handles it gracefully instead of seeing SPA HTML.
 			c.Status(http.StatusNotFound)
 		}
 	})
 
-	router.GET("/docs", func(c *gin.Context) {
-		serveDocsMirrorFile(c, "index.html")
-	})
-	router.GET("/docs/*path", func(c *gin.Context) {
-		urlPath := c.Param("path")
-		if urlPath == "/_next/image" {
-			serveDocsImage(c)
-			return
-		}
-		serveDocsMirrorPath(c, urlPath)
+	// /assets/newapi.svg — docs logo, referenced by original HTML (no rewrite needed)
+	router.GET("/assets/newapi.svg", func(c *gin.Context) {
+		serveDocsMirrorFile(c, "assets/newapi.svg")
 	})
 }
 

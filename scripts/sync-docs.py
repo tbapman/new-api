@@ -55,43 +55,38 @@ def fetch(url: str, retries: int = 3) -> bytes | None:
 
 
 def rewrite_html(html: str, page_path: str) -> str:
-    """Rewrite URLs in HTML so everything is served from /docs/."""
-    # Rewrite /_next/ references to /docs/_next/
-    html = re.sub(r'((?:src|href|srcSet|url)=["\'])/_next/', r'\1/docs/_next/', html)
-    html = re.sub(r'("|\')/_next/', r'\1/docs/_next/', html)
-    # Also handle JS string references in inline scripts
-    html = html.replace('"/_next/', '"/docs/_next/')
-    html = html.replace("'/_next/", "'/docs/_next/")
+    """Minimal URL rewriting: only fix absolute URLs and image optimization paths.
 
-    # Rewrite absolute docs URLs to internal /docs/ path
-    html = html.replace(
-        f"https://docs.newapi.pro{DOCS_PREFIX}/", "/docs/"
-    )
-    html = html.replace(
-        f"https://docs.newapi.pro{DOCS_PREFIX}", "/docs"
-    )
-    # Rewrite site-relative /zh/docs/ links
-    html = html.replace(f"{DOCS_PREFIX}/", "/docs/")
-    html = html.replace(f"{DOCS_PREFIX}", "/docs")
+    We NO LONGER rewrite /zh/docs/ → /docs/ or /_next/ → /docs/_next/.
+    Pages are served at their original /zh/docs/... paths so that Next.js JS
+    route definitions (which reference /zh/docs/...) match the browser URL,
+    allowing React hydration to succeed and making interactive components work.
 
-    # Rewrite /assets/ image references (logo etc)
-    html = html.replace('href="/assets/', 'href="/docs/assets/')
-    html = html.replace('src="/assets/', 'src="/docs/assets/')
-
-    # Rewrite Next.js image optimization API URLs to direct file paths
-    # src="/docs/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffoo.png&w=..."
-    # → src="/docs/_next/static/media/foo.png"
+    Go handles:
+      /_next/static/*  → web/docs-mirror/_next/static/...
+      /_next/image     → web/docs-mirror/_next/static/media/...
+      /zh/docs/*       → web/docs-mirror (files saved per DOCS_PREFIX strip below)
+      /docs → /zh/docs redirect (for top-nav link compatibility)
+    """
     import urllib.parse
 
+    # Normalize absolute docs URLs to site-relative /zh/docs/ paths
+    html = html.replace(f"https://docs.newapi.pro{DOCS_PREFIX}/", f"{DOCS_PREFIX}/")
+    html = html.replace(f"https://docs.newapi.pro{DOCS_PREFIX}", DOCS_PREFIX)
+    html = html.replace("https://www.newapi.ai/zh/docs/", f"{DOCS_PREFIX}/")
+    html = html.replace("https://www.newapi.ai/zh/docs", DOCS_PREFIX)
+
+    # Rewrite /_next/image?url=...&w=... → direct /_next/static/media/... path.
+    # The /_next/static/* Go handler serves these without the image optimization API.
     def _rewrite_img(m: re.Match) -> str:
         encoded = m.group(1)
         decoded = urllib.parse.unquote(encoded)
         if decoded.startswith("/_next/static/media/"):
-            return f'src="/docs{decoded}"'
+            return f'src="{decoded}"'
         return m.group(0)
 
     html = re.sub(
-        r'src="/docs/_next/image\?url=([^&"\']+)[^"\']*"',
+        r'src="/_next/image\?url=([^&"\']+)[^"\']*"',
         _rewrite_img,
         html,
     )
@@ -99,28 +94,19 @@ def rewrite_html(html: str, page_path: str) -> str:
     return html
 
 
-# Injected into <head> (before any other scripts) to intercept history.pushState.
-# Next.js client-side routing calls pushState with original /zh/docs/... paths.
-# We translate to /docs/... and force a full page load so Go serves the mirror HTML.
+# Injected into <head> to intercept Next.js client-side navigation.
+# Next.js calls history.pushState('/zh/docs/...') when navigating between pages.
+# We force a full page load so Go serves the correct mirrored HTML instead of
+# Next.js trying to fetch RSC payloads (/_next/data/...) that don't exist.
 _FORCE_FULL_NAV_SCRIPT = (
     '<script>'
     '(function(){'
-    # Translate /zh/docs/... → /docs/...
-    'function tr(u){'
-    'if(u&&u.startsWith("/zh/docs"))return"/docs"+u.slice(3);'  # /zh = 3 chars
-    'return u;}'
-    'var _push=history.pushState.bind(history);'
-    'history.pushState=function(s,t,url){'
-    'if(url&&typeof url==="string"&&url.startsWith("/")){'
-    'window.location.href=tr(url);return;'
-    '}_push(s,t,url);};'
-    'var _rep=history.replaceState.bind(history);'
-    'history.replaceState=function(s,t,url){'
-    'if(url&&typeof url==="string"&&url.startsWith("/")){'
-    'var tu=tr(url);'
-    # Only force reload if URL actually changes (avoid infinite reload on init)
-    'if(tu!==location.pathname+location.search){window.location.href=tu;return;}'
-    '}_rep(s,t,url);};'
+    'var _p=history.pushState.bind(history);'
+    'history.pushState=function(s,t,u){'
+    # Only intercept /zh/docs/... navigations; pass everything else through.
+    'if(u&&typeof u==="string"&&u.startsWith("/zh/")){'
+    'window.location.href=u;return;'
+    '}_p(s,t,u);};'
     '})();'
     '</script>'
 )
