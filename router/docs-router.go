@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,15 +17,15 @@ const docsMirrorDir = "web/docs-mirror"
 // SetDocsRouter mounts the /docs static mirror if web/docs-mirror/ exists on disk.
 // It handles:
 //
-//	/docs              → web/docs-mirror/index.html
-//	/docs/apps         → web/docs-mirror/apps/index.html
-//	/docs/_next/...    → web/docs-mirror/_next/... (JS/CSS assets)
-//	/docs/assets/...   → web/docs-mirror/assets/...
+//	/docs                            → web/docs-mirror/index.html
+//	/docs/apps                       → web/docs-mirror/apps/index.html
+//	/docs/_next/image?url=...        → web/docs-mirror/_next/static/media/... (doc images)
+//	/docs/_next/static/...           → web/docs-mirror/_next/static/... (JS/CSS assets)
+//	/docs/assets/...                 → web/docs-mirror/assets/...
 //
-// Falls back to 404 with a helpful message when the mirror is not present.
+// Falls back to 503 with a helpful message when the mirror is not present.
 func SetDocsRouter(router *gin.Engine) {
 	if _, err := os.Stat(docsMirrorDir); os.IsNotExist(err) {
-		// Mirror not synced yet – register a handler that explains how to sync.
 		router.GET("/docs", docsMirrorMissing)
 		router.GET("/docs/*path", docsMirrorMissing)
 		return
@@ -34,14 +35,42 @@ func SetDocsRouter(router *gin.Engine) {
 		serveDocsMirrorFile(c, "index.html")
 	})
 	router.GET("/docs/*path", func(c *gin.Context) {
-		urlPath := c.Param("path") // leading slash included, e.g. "/apps/aionui"
+		urlPath := c.Param("path")
+		// Special case: Next.js image optimization API
+		// /docs/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffoo.png&w=...
+		if urlPath == "/_next/image" {
+			serveDocsImage(c)
+			return
+		}
 		serveDocsMirrorPath(c, urlPath)
 	})
 }
 
+// serveDocsImage handles /docs/_next/image?url=/_next/static/media/foo.png
+// by serving the pre-downloaded image file directly from the mirror.
+func serveDocsImage(c *gin.Context) {
+	rawURL := c.Query("url")
+	if rawURL == "" {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+	// url param may be URL-encoded (e.g. %2F_next%2Fstatic%2Fmedia%2Ffoo.png)
+	decoded, err := url.QueryUnescape(rawURL)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+	// Only serve files under /_next/static/media/ to prevent traversal
+	if !strings.HasPrefix(decoded, "/_next/static/media/") {
+		c.Status(http.StatusForbidden)
+		return
+	}
+	rel := strings.TrimPrefix(decoded, "/")
+	serveDocsMirrorFile(c, rel)
+}
+
 // serveDocsMirrorPath resolves the URL sub-path to a file inside web/docs-mirror/.
 func serveDocsMirrorPath(c *gin.Context, urlPath string) {
-	// Strip leading slash
 	rel := strings.TrimPrefix(urlPath, "/")
 
 	// Strip query string from asset paths (e.g. file.js?dpl=xxx → file.js)
@@ -49,7 +78,7 @@ func serveDocsMirrorPath(c *gin.Context, urlPath string) {
 		rel = rel[:idx]
 	}
 
-	// Try exact file first (JS, CSS, SVG, etc.)
+	// Try exact file first (JS, CSS, SVG, images, etc.)
 	exact := filepath.Join(docsMirrorDir, filepath.FromSlash(rel))
 	if info, err := os.Stat(exact); err == nil && !info.IsDir() {
 		serveDocsMirrorFile(c, rel)

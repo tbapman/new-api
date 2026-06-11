@@ -151,6 +151,23 @@ def extract_assets(html: str) -> list[str]:
     return all_assets
 
 
+def extract_images(html: str) -> list[str]:
+    """Extract image file paths from Next.js /_next/image?url=... references."""
+    # Matches: src="/docs/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffoo.png&..."
+    encoded = re.findall(r'/_next/image\?url=([^&"\'>\s]+)', html)
+    paths = []
+    for enc in encoded:
+        try:
+            import urllib.parse
+            decoded = urllib.parse.unquote(enc)
+            # Keep only /_next/static/media/... paths
+            if decoded.startswith("/_next/static/media/"):
+                paths.append(decoded.split("?")[0])
+        except Exception:
+            pass
+    return list(set(paths))
+
+
 def download_asset(asset_path: str) -> None:
     with asset_lock:
         if asset_path in downloaded_assets:
@@ -213,10 +230,13 @@ def main():
         save_html(path, data)
         html_str = data.decode("utf-8", errors="replace")
         assets = extract_assets(html_str)
+        for img in extract_images(html_str):
+            all_image_paths.add(img)
         print(f"  OK   {path} ({len(assets)} assets)", flush=True)
         return assets
 
     print("\n=== Downloading pages ===", flush=True)
+    all_image_paths: set[str] = set()
     with ThreadPoolExecutor(max_workers=CONCURRENCY) as pool:
         futures = {pool.submit(download_page, p): p for p in paths}
         for future in as_completed(futures):
@@ -240,7 +260,25 @@ def main():
     with ThreadPoolExecutor(max_workers=CONCURRENCY) as pool:
         list(pool.map(dl_asset, sorted(all_asset_paths)))
 
-    # 4. Download /assets/ images referenced in HTML (logo etc.)
+    # 4. Download doc images (/_next/static/media/*)
+    print(f"\n=== Downloading {len(all_image_paths)} images ===", flush=True)
+
+    def dl_image(img_path: str):
+        out_file = OUT_DIR / img_path.lstrip("/")
+        if out_file.exists():
+            return
+        url = BASE_URL + img_path
+        data = fetch(url)
+        if data:
+            save_asset(img_path, data)
+            print(f"  IMG  {img_path}", flush=True)
+        else:
+            print(f"  FAIL {img_path}", flush=True)
+
+    with ThreadPoolExecutor(max_workers=CONCURRENCY) as pool:
+        list(pool.map(dl_image, sorted(all_image_paths)))
+
+    # 5. Download /assets/ images referenced in HTML (logo etc.)
     print("\n=== Downloading site images ===", flush=True)
     for img_path in ["/assets/newapi.svg"]:
         url = BASE_URL + img_path
