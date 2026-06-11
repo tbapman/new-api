@@ -184,6 +184,24 @@ def extract_assets(html: str) -> list[str]:
     return all_assets
 
 
+def extract_chunk_refs_from_js(js_content: str) -> list[str]:
+    """Find chunk references inside a downloaded JS file.
+
+    _buildManifest.js lists all page-specific chunks as relative paths like
+    "static/chunks/b6d23e2ebadc2fe5.js" (no /_next/ prefix), which the HTML
+    scanner misses. We also look for absolute /_next/static/... refs that appear
+    in the webpack runtime and other bundles.
+    """
+    refs = []
+    # Absolute: "/_next/static/chunks/foo.js"
+    refs += re.findall(r'"(/_next/static/[^"]+\.(?:js|css))"', js_content)
+    refs += re.findall(r"'(/_next/static/[^']+\.(?:js|css))'", js_content)
+    # Relative (from _buildManifest.js / webpack chunk map): "static/chunks/foo.js"
+    rel = re.findall(r'"(static/(?:chunks|css)/[^"\\]+\.(?:js|css))"', js_content)
+    refs += [f"/_next/{r}" for r in rel]
+    return list({r.split("?")[0] for r in refs})
+
+
 def extract_images(html: str) -> list[str]:
     """Extract image file paths from Next.js /_next/image?url=... references."""
     # Matches: src="/docs/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffoo.png&..."
@@ -292,6 +310,29 @@ def main():
 
     with ThreadPoolExecutor(max_workers=CONCURRENCY) as pool:
         list(pool.map(dl_asset, sorted(all_asset_paths)))
+
+    # 3b. Scan downloaded JS for additional chunks (_buildManifest.js lists
+    #     page-specific chunks as relative paths not visible in the HTML).
+    print("\n=== Scanning downloaded JS for additional chunks ===", flush=True)
+    extra_chunks: set[str] = set()
+    js_static_dir = OUT_DIR / "_next" / "static"
+    if js_static_dir.exists():
+        for js_file in js_static_dir.rglob("*.js"):
+            try:
+                js_content = js_file.read_text(encoding="utf-8", errors="replace")
+                for ref in extract_chunk_refs_from_js(js_content):
+                    out_file = OUT_DIR / ref.lstrip("/")
+                    if not out_file.exists():
+                        extra_chunks.add(ref)
+            except Exception:
+                pass
+
+    if extra_chunks:
+        print(f"  {len(extra_chunks)} additional chunks to download", flush=True)
+        with ThreadPoolExecutor(max_workers=CONCURRENCY) as pool:
+            list(pool.map(dl_asset, sorted(extra_chunks)))
+    else:
+        print("  No additional chunks needed", flush=True)
 
     # 4. Download doc images (/_next/static/media/*)
     print(f"\n=== Downloading {len(all_image_paths)} images ===", flush=True)
