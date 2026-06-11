@@ -31,13 +31,17 @@ func SetDocsRouter(router *gin.Engine) {
 		return
 	}
 
+	// Handle Next.js image optimization API used by JS client code.
+	// Requests come in as /_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffoo.png&w=...
+	// We serve the pre-downloaded file directly from the mirror.
+	router.GET("/_next/image", serveDocsImage)
+
 	router.GET("/docs", func(c *gin.Context) {
 		serveDocsMirrorFile(c, "index.html")
 	})
 	router.GET("/docs/*path", func(c *gin.Context) {
 		urlPath := c.Param("path")
-		// Special case: Next.js image optimization API
-		// /docs/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffoo.png&w=...
+		// Also handle /docs/_next/image for HTML img src attributes
 		if urlPath == "/_next/image" {
 			serveDocsImage(c)
 			return
