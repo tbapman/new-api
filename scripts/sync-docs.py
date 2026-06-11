@@ -99,6 +99,25 @@ def rewrite_html(html: str, page_path: str) -> str:
     return html
 
 
+# Injected before </body> to force full-page navigation, bypassing Next.js
+# client-side routing (which would fetch RSC payloads we don't have).
+_FORCE_FULL_NAV_SCRIPT = (
+    '<script>'
+    '(function(){'
+    'document.addEventListener("click",function(e){'
+    'var el=e.target;'
+    'while(el&&el.tagName!=="A")el=el.parentElement;'
+    'if(!el)return;'
+    'var h=el.getAttribute("href");'
+    'if(!h||!h.startsWith("/")||h.startsWith("//"))return;'
+    'e.stopImmediatePropagation();e.preventDefault();'
+    'window.location.href=h;'
+    '},true);'
+    '})();'
+    '</script>'
+)
+
+
 def save_html(path: str, content: bytes) -> None:
     """Save an HTML page to the mirror directory."""
     # Strip the /zh/docs prefix from the path
@@ -124,6 +143,8 @@ def save_html(path: str, content: bytes) -> None:
     out_file.parent.mkdir(parents=True, exist_ok=True)
     html_str = content.decode("utf-8", errors="replace")
     html_str = rewrite_html(html_str, path)
+    # Inject navigation override before </body>
+    html_str = html_str.replace("</body>", _FORCE_FULL_NAV_SCRIPT + "</body>", 1)
     out_file.write_text(html_str, encoding="utf-8")
 
 
