@@ -178,7 +178,12 @@ func RequestWxpayPay(c *gin.Context) {
 // QueryWxpayOrderStatus 供前端轮询微信 Native 扫码支付的订单状态。
 // 微信扫码支付在手机端完成、由异步通知回调入账，桌面端没有跳转，
 // 因此前端需要轮询本接口获取订单是否已支付成功。
+//
+// 当订单仍为待支付时，会主动调用微信「查询订单」接口作为异步通知的兜底：
+// 即使 notify 回调因网络/配置原因未送达，只要用户已在微信侧完成支付，
+// 本接口也能查到 SUCCESS 并完成入账，避免订单永远卡在 pending。
 func QueryWxpayOrderStatus(c *gin.Context) {
+	ctx := c.Request.Context()
 	tradeNo := c.Query("trade_no")
 	if tradeNo == "" {
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "缺少订单号"})
@@ -190,11 +195,36 @@ func QueryWxpayOrderStatus(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "订单不存在"})
 		return
 	}
+
+	status := topUp.Status
+
+	if status == common.TopUpStatusPending {
+		if client, err := newWxpayClient(); err != nil {
+			logger.LogWarn(ctx, fmt.Sprintf("微信支付 主动查询创建客户端失败 trade_no=%s error=%q", tradeNo, err.Error()))
+		} else if rsp, qerr := client.V3TransactionQueryOrder(ctx, wechat.OutTradeNo, tradeNo); qerr != nil {
+			logger.LogWarn(ctx, fmt.Sprintf("微信支付 主动查询订单失败 trade_no=%s error=%q", tradeNo, qerr.Error()))
+		} else if rsp != nil && rsp.Response != nil {
+			logger.LogInfo(ctx, fmt.Sprintf("微信支付 主动查询订单 trade_no=%s trade_state=%s", tradeNo, rsp.Response.TradeState))
+			switch rsp.Response.TradeState {
+			case "SUCCESS":
+				wxpayFulfillOrder(ctx, tradeNo, c.ClientIP())
+				if updated := model.GetUserTopUpByTradeNo(id, tradeNo); updated != nil {
+					status = updated.Status
+				}
+			case "CLOSED", "PAYERROR", "REVOKED":
+				_ = model.UpdatePendingTopUpStatus(tradeNo, model.PaymentProviderWxpay, common.TopUpStatusFailed)
+				status = common.TopUpStatusFailed
+			default:
+				// NOTPAY / USERPAYING 等：保持 pending，等待用户完成支付
+			}
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "success",
 		"data": gin.H{
 			"trade_no": topUp.TradeNo,
-			"status":   topUp.Status,
+			"status":   status,
 		},
 	})
 }
