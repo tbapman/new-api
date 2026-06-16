@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { getSelf } from '@/lib/api'
 import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
@@ -30,7 +31,7 @@ import {
   getMinTopupAmount,
   isWaffoPancakePayment,
 } from './lib'
-import { previewTopupFee } from './api'
+import { previewTopupFee, queryWxpayOrder } from './api'
 import type {
   UserWalletData,
   PaymentMethod,
@@ -105,6 +106,7 @@ export function Wallet(props: WalletProps) {
     processing: wxpayProcessing,
     qrCodeUrl,
     qrDialogOpen,
+    tradeNo: wxpayTradeNo,
     setQrDialogOpen,
     calculateWxpayPaymentAmount,
     processWxpayPayment,
@@ -136,6 +138,41 @@ export function Wallet(props: WalletProps) {
       window.history.replaceState({}, '', window.location.pathname)
     }
   }, [props.initialShowHistory])
+
+  // Poll WeChat Pay order status while the QR dialog is open.
+  // WeChat Native pay completes on the user's phone with no browser redirect,
+  // so we poll the backend and, on success, close the dialog, refresh the
+  // balance and open billing history (mirroring Alipay's show_history return).
+  useEffect(() => {
+    if (!qrDialogOpen || !wxpayTradeNo) return
+
+    let cancelled = false
+    const interval = setInterval(async () => {
+      try {
+        const res = await queryWxpayOrder(wxpayTradeNo)
+        if (cancelled) return
+        const status = res.data?.status
+        if (status === 'success') {
+          clearInterval(interval)
+          setQrDialogOpen(false)
+          toast.success(t('Payment successful'))
+          await fetchUser()
+          setBillingDialogOpen(true)
+        } else if (status === 'failed' || status === 'expired') {
+          clearInterval(interval)
+          setQrDialogOpen(false)
+          toast.error(t('Payment failed or order expired'))
+        }
+      } catch {
+        // transient error — keep polling until the dialog is closed
+      }
+    }, 3000)
+
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  }, [qrDialogOpen, wxpayTradeNo, fetchUser, setQrDialogOpen, t])
 
   // Initialize topup amount when topup info is loaded
   useEffect(() => {

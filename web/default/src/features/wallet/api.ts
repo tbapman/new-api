@@ -22,6 +22,7 @@ import type {
   WaffoPancakePaymentResponse,
   AlipayPaymentResponse,
   WxpayPaymentResponse,
+  WxpayOrderStatusResponse,
   FeePreviewRequest,
   FeePreviewResponse,
 } from './types'
@@ -211,6 +212,23 @@ export async function requestWxpayPayment(
   const res = await api.post('/api/user/wxpay/pay', request, {
     skipBusinessError: true,
   } as Record<string, unknown>)
+  return res.data
+}
+
+/**
+ * Query WeChat Pay order status (for polling while the QR dialog is open).
+ * WeChat Native pay completes on the user's phone with no browser redirect,
+ * so the page polls this endpoint to detect a successful payment.
+ */
+export async function queryWxpayOrder(
+  tradeNo: string
+): Promise<WxpayOrderStatusResponse> {
+  const res = await api.get(
+    `/api/user/wxpay/query?trade_no=${encodeURIComponent(tradeNo)}`,
+    {
+      skipBusinessError: true,
+    } as Record<string, unknown>
+  )
   return res.data
 }
 

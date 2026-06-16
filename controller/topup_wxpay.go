@@ -171,7 +171,31 @@ func RequestWxpayPay(c *gin.Context) {
 	logger.LogInfo(c.Request.Context(), fmt.Sprintf("微信支付 充值订单创建成功 user_id=%d trade_no=%s amount=%d money=%.2f fen=%d", id, tradeNo, req.Amount, payMoney, totalFen))
 	c.JSON(http.StatusOK, gin.H{
 		"message": "success",
-		"data":    gin.H{"code_url": wxRsp.Response.CodeUrl},
+		"data":    gin.H{"code_url": wxRsp.Response.CodeUrl, "trade_no": tradeNo},
+	})
+}
+
+// QueryWxpayOrderStatus 供前端轮询微信 Native 扫码支付的订单状态。
+// 微信扫码支付在手机端完成、由异步通知回调入账，桌面端没有跳转，
+// 因此前端需要轮询本接口获取订单是否已支付成功。
+func QueryWxpayOrderStatus(c *gin.Context) {
+	tradeNo := c.Query("trade_no")
+	if tradeNo == "" {
+		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "缺少订单号"})
+		return
+	}
+	id := c.GetInt("id")
+	topUp := model.GetUserTopUpByTradeNo(id, tradeNo)
+	if topUp == nil {
+		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "订单不存在"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success",
+		"data": gin.H{
+			"trade_no": topUp.TradeNo,
+			"status":   topUp.Status,
+		},
 	})
 }
 

@@ -22,6 +22,7 @@ export function useWxpayPayment() {
   const [amount, setAmount] = useState(0)
   const [qrCodeUrl, setQrCodeUrl] = useState('')
   const [qrDialogOpen, setQrDialogOpen] = useState(false)
+  const [tradeNo, setTradeNo] = useState('')
 
   const calculateWxpayPaymentAmount = useCallback(
     async (topupAmount: number) => {
@@ -68,6 +69,7 @@ export function useWxpayPayment() {
         return false
       }
 
+      setTradeNo(response.data?.trade_no || '')
       setQrCodeUrl(codeUrl)
       setQrDialogOpen(true)
       return true
@@ -85,6 +87,7 @@ export function useWxpayPayment() {
     processing,
     qrCodeUrl,
     qrDialogOpen,
+    tradeNo,
     setQrDialogOpen,
     setAmount,
     calculateWxpayPaymentAmount,

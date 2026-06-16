@@ -105,6 +105,19 @@ func GetTopUpByTradeNo(tradeNo string) *TopUp {
 	return topUp
 }
 
+// GetUserTopUpByTradeNo 按订单号查询某个用户自己的充值订单，用于前端轮询订单状态。
+// 限定 user_id 以防止越权查询他人订单。
+func GetUserTopUpByTradeNo(userId int, tradeNo string) *TopUp {
+	if tradeNo == "" {
+		return nil
+	}
+	var topUp *TopUp
+	if err := DB.Where("user_id = ? AND trade_no = ?", userId, tradeNo).First(&topUp).Error; err != nil {
+		return nil
+	}
+	return topUp
+}
+
 func UpdatePendingTopUpStatus(tradeNo string, expectedPaymentProvider string, targetStatus string) error {
 	if tradeNo == "" {
 		return errors.New("未提供支付单号")

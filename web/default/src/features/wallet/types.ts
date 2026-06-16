@@ -70,7 +70,14 @@ export type WaffoPancakePaymentResponse = ApiResponse<
   | string
 >
 export type AlipayPaymentResponse = ApiResponse<{ pay_form: string }>
-export type WxpayPaymentResponse = ApiResponse<{ code_url: string }>
+export type WxpayPaymentResponse = ApiResponse<{
+  code_url: string
+  trade_no: string
+}>
+export type WxpayOrderStatusResponse = ApiResponse<{
+  trade_no: string
+  status: TopupStatus
+}>
 
 /**
  * Creem product configuration
@@ -267,7 +274,7 @@ export interface UserWalletData {
 /**
  * Topup record status
  */
-export type TopupStatus = 'success' | 'pending' | 'expired'
+export type TopupStatus = 'success' | 'pending' | 'expired' | 'failed'
 
 /**
  * Topup billing record

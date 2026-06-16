@@ -27,6 +27,10 @@ export const STATUS_CONFIG: Record<TopupStatus, StatusConfig> = {
     variant: 'danger',
     label: 'Expired',
   },
+  failed: {
+    variant: 'danger',
+    label: 'Failed',
+  },
 }
 
 /**
