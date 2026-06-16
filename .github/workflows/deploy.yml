@@ -69,22 +69,25 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
+            # 任何命令失败立即中止，避免 pull/login 失败却被静默跳过导致「假成功」
+            set -euo pipefail
+
             # 进入项目目录
             cd /home/codespace/new-api
 
-            # 拉取最新代码
-            git stash
+            # 拉取最新代码（保留本地改动，无 stash 时不报错）
+            git stash push -m ci-deploy || true
             git pull origin main
-            git stash pop
+            git stash pop || true
 
-            # 登录 GHCR（用 GitHub PAT）
+            # 登录 GHCR（用 GitHub PAT，需具备 read:packages 权限）
             echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            # 拉取最新镜像
+            # 拉取最新镜像（失败则中止，不再用旧镜像继续）
             docker pull ghcr.io/${{ github.repository }}:latest
 
-            # 滚动重启（零停机：先启新容器再停旧容器）
-            docker compose up -d --no-build new-api
+            # 强制用最新镜像重建容器（避免 --no-build 时容器仍跑旧镜像）
+            docker compose up -d --pull always --force-recreate new-api
 
             # 清理旧镜像
             docker image prune -f
