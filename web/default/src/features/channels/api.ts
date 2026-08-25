@@ -222,18 +222,6 @@ export async function deleteDisabledChannels(): Promise<{
   return res.data
 }
 
-/**
- * Get channel key (requires 2FA verification)
- */
-export async function getChannelKey(
-  id: number,
-  code?: string
-): Promise<{ success: boolean; message?: string; data?: { key: string } }> {
-  const payload = code ? { code } : undefined
-  const res = await api.post(`/api/channel/${id}/key`, payload)
-  return res.data
-}
-
 // ============================================================================
 // Codex Channel Operations
 // ============================================================================

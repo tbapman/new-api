@@ -189,16 +189,6 @@ export class SecureVerificationService {
  */
 export const createApiCalls = {
   /**
-   * 创建查看渠道密钥的API调用
-   * @param {number} channelId - 渠道ID
-   */
-  viewChannelKey: (channelId) => async () => {
-    // 新系统中，验证已通过中间件处理，直接调用 API 即可
-    const response = await API.post(`/api/channel/${channelId}/key`, {});
-    return response.data;
-  },
-
-  /**
    * 创建自定义API调用
    * @param {string} url - API URL
    * @param {string} method - HTTP方法，默认为 'POST'
